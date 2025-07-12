@@ -12,7 +12,8 @@ void init_history(History *history) {
 }
 
 void free_history(History *history) {
-    if (!history) return;
+    if (!history) 
+        return;
     for (int i = 0; i < history->count; i++) {
         free(history->entries[i].points);
     }
@@ -69,7 +70,7 @@ HistoryEntry pop_history(History *history) {
     return entry;
 }
 
-int is_history_empty(History *history) {
+bool is_history_empty(const History *history) {
     return history->count == 0;
 }
 

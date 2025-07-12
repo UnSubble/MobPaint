@@ -157,15 +157,12 @@ bool paint_context_redo(PaintContext *paint_context) {
 }
 
 void free_paint_context(PaintContext *ctx) {
-    if (!ctx) return;
+    if (!ctx) 
+        return;
 
-    for (int i = 0; i < ctx->undo_stack->count; i++)
-        free(ctx->undo_stack->entries[i].points);
     free_history(ctx->undo_stack);
     free(ctx->undo_stack);
 
-    for (int i = 0; i < ctx->redo_stack->count; i++)
-        free(ctx->redo_stack->entries[i].points);
     free_history(ctx->redo_stack);
     free(ctx->redo_stack);
 

@@ -2,7 +2,7 @@
 #include "context/paint_context.h"
 #include <string.h>
 
-ToolType get_tooltype_from_string(char *tool_name) {
+ToolType get_tooltype_from_string(const char *tool_name) {
     if (strcasecmp(tool_name, "BRUSH") == 0) {
         return TOOL_BRUSH;
     } else if (strcasecmp(tool_name, "ERASER") == 0) {
@@ -12,7 +12,7 @@ ToolType get_tooltype_from_string(char *tool_name) {
     }
 }
 
-void init_tool(Tool *tool, Config *config) {
+void init_tool(Tool *tool, const Config *config) {
     if (config) {
         tool->type = get_tooltype_from_string(config->default_tool);
         tool->size = config->brush_size;
