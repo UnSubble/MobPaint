@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -Iinclude
 LDFLAGS = -lSDL2 -lpthread -lcjson
 
 # Source and output
-SRC = src/*.c src/tools/*.c
+SRC = src/*.c src/tools/*.c src/context/*.c
 OUTDIR = out
 OUT = $(OUTDIR)/mobpaint
 

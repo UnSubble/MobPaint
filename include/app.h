@@ -1,7 +1,7 @@
 #ifndef APP_H
 #define APP_H
 
-#include "config.h"
+#include "context/config.h"
 
 // Starts the main application window and event loop.
 // Receives the path to the target file (image or canvas).

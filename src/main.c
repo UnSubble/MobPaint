@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "logs.h"
-#include "config.h"
+#include "context/logs.h"
+#include "context/config.h"
 
 #define MAX_PATH_LEN 512
 

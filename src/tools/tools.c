@@ -1,4 +1,5 @@
 #include "tools/tools.h"
+#include "context/paint_context.h"
 #include <string.h>
 
 ToolType get_tooltype_from_string(char *tool_name) {
@@ -39,22 +40,23 @@ void set_tool_type(Tool *tool, ToolType type) {
     }
 }
 
-void use_tool(SDL_Renderer *renderer, Tool *tool, int x, int y, int prev_x, int prev_y) {
-    SDL_SetRenderDrawColor(renderer, tool->color.r, tool->color.g, tool->color.b, tool->color.a);
+void use_tool(PaintContext* context, int prev_x, int prev_y) {
+    Tool *tool = &context->current_tool; 
+    SDL_SetRenderDrawColor(context->renderer, tool->color.r, tool->color.g, tool->color.b, tool->color.a);
 
     switch (tool->type) {
     case TOOL_BRUSH:
     case TOOL_ERASER: {
         SDL_Rect brush = {
-            x - tool->size / 2,
-            y - tool->size / 2,
+            context->mouse_x - tool->size / 2,
+            context->mouse_y - tool->size / 2,
             tool->size,
             tool->size
         };
-        SDL_RenderFillRect(renderer, &brush);
+        SDL_RenderFillRect(context->renderer, &brush);
 
         if (prev_x != -1 && prev_y != -1) {
-            SDL_RenderDrawLine(renderer, prev_x, prev_y, x, y);
+            SDL_RenderDrawLine(context->renderer, prev_x, prev_y, context->mouse_x, context->mouse_y);
         }
         break;
     }

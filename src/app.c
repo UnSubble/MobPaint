@@ -1,5 +1,6 @@
 #include "app.h"
-#include "logs.h"
+#include "context/logs.h"
+#include "context/paint_context.h"
 #include "tools/tools.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -36,19 +37,20 @@ int run_app(const char *target_file_path, Config* config) {
 
     SDL_Color background_color = config->default_background_color;
 
-    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, 
-                                    background_color.b, background_color.a);
+    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g,
+                                      background_color.b, background_color.a);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
     SDL_ShowWindow(window);
 
+    PaintContext context;
     Tool current_tool;
     init_tool(&current_tool, config);
+    init_paint_context(renderer, &context, config, current_tool);
 
     bool running = true;
     bool drawing = false;
     bool needs_redraw = false;
-    int prev_x = -1, prev_y = -1;  // Track previous position for smooth drawing
     SDL_Event event;
 
     while (running) {
@@ -62,35 +64,38 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         drawing = true;
-                        prev_x = event.button.x;
-                        prev_y = event.button.y;
+                        context.mouse_x = event.button.x;
+                        context.mouse_y = event.button.y;
 
-                        use_tool(renderer, &current_tool, prev_x, prev_y, -1, -1);
+                        use_tool(&context, -1, -1);
                         needs_redraw = true;
+                        start_stroke(&context);
 
-                        log_info("Drawing started at (%d, %d).", prev_x, prev_y);
+                        log_info("Drawing started at (%d, %d).", context.mouse_x, context.mouse_y);
                     }
                     break;
 
                 case SDL_MOUSEBUTTONUP:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         drawing = false;
-                        prev_x = -1;
-                        prev_y = -1;
+                        context.mouse_x = -1;
+                        context.mouse_y = -1;
+                        end_stroke(&context);
+                        needs_redraw = true;
                         log_info("Drawing stopped.");
                     }
                     break;
 
                 case SDL_MOUSEMOTION:
                     if (drawing && (event.motion.state & SDL_BUTTON_LMASK)) {
-                        int curr_x = event.motion.x;
-                        int curr_y = event.motion.y;
+                        int prev_x = context.mouse_x;
+                        int prev_y = context.mouse_y;
+                        context.mouse_x = event.motion.x;
+                        context.mouse_y = event.motion.y;
 
-                        use_tool(renderer, &current_tool, curr_x, curr_y, prev_x, prev_y);
+                        add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                        use_tool(&context, prev_x, prev_y);
                         needs_redraw = true;
-
-                        prev_x = curr_x;
-                        prev_y = curr_y;
                     }
                     break;
 
@@ -99,17 +104,28 @@ int run_app(const char *target_file_path, Config* config) {
                         log_info("ESC pressed. Exiting.");
                         running = false;
                     } else if (event.key.keysym.sym == SDLK_c && (event.key.keysym.mod & KMOD_CTRL)) {
-                        // Clear canvas with Ctrl+C
-                        SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, 
-                                                        background_color.b, background_color.a);
+                        SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g,
+                                                          background_color.b, background_color.a);
                         SDL_RenderClear(renderer);
+                        SDL_RenderCopy(renderer, context.bitmap_cache, NULL, NULL);
                         needs_redraw = true;
                         log_info("Canvas cleared.");
+                    } else if (event.key.keysym.sym == SDLK_z && (event.key.keysym.mod & KMOD_CTRL)) {
+                        bool changed = false;
+                        if (event.key.keysym.mod & KMOD_SHIFT) {
+                            changed = paint_context_redo(&context);
+                        } else {
+                            changed = paint_context_undo(&context);
+                        }
+                        if (changed) {
+                            redraw_canvas(&context);
+                            needs_redraw = true;
+                        }
                     } else if (event.key.keysym.sym == SDLK_1) {
-                        set_tool_type(&current_tool, TOOL_BRUSH);
+                        set_tool_type(&context.current_tool, TOOL_BRUSH);
                         log_info("Tool switched to BRUSH.");
                     } else if (event.key.keysym.sym == SDLK_2) {
-                        set_tool_type(&current_tool, TOOL_ERASER);
+                        set_tool_type(&context.current_tool, TOOL_ERASER);
                         log_info("Tool switched to ERASER.");
                     }
                     break;
@@ -127,6 +143,7 @@ int run_app(const char *target_file_path, Config* config) {
         SDL_Delay(1);
     }
 
+    free_paint_context(&context);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
