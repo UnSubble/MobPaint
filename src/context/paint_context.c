@@ -116,25 +116,27 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
         entry->tool.color.b,
         entry->tool.color.a);
 
-    for (int i = 1; i < entry->count; i++) {
-        SDL_RenderDrawLine(renderer,
-            entry->points[i - 1].x, entry->points[i - 1].y,
-            entry->points[i].x, entry->points[i].y);
+    SDL_Rect rect;
+    rect.w = entry->tool.size;
+    rect.h = entry->tool.size;
+
+    for (int i = 0; i < entry->count; i++) {
+        rect.x = entry->points[i].x - rect.w / 2;
+        rect.y = entry->points[i].y - rect.h / 2;
+        SDL_RenderFillRect(renderer, &rect);
     }
 }
 
-void redraw_canvas(PaintContext *ctx) {
-    if (!ctx || !ctx->renderer) return;
+void redraw_canvas(PaintContext *paint_context) {
+    if (!paint_context || !paint_context->renderer) 
+        return;
 
-    SDL_SetRenderDrawColor(ctx->renderer, 255, 255, 255, 255); // Background fallback
-    SDL_RenderClear(ctx->renderer);
+    SDL_SetRenderTarget(paint_context->renderer, NULL);
+    SDL_SetRenderDrawColor(paint_context->renderer, 255, 255, 255, 255);
+    SDL_RenderClear(paint_context->renderer);
 
-    if (ctx->bitmap_cache) {
-        SDL_RenderCopy(ctx->renderer, ctx->bitmap_cache, NULL, NULL);
-    }
-
-    for (int i = ctx->committed_stroke_count; i < ctx->undo_stack->count; i++) {
-        apply_history_entry(ctx->renderer, &ctx->undo_stack->entries[i]);
+    for (int i = 0; i < paint_context->undo_stack->count; i++) {
+        apply_history_entry(paint_context->renderer, &paint_context->undo_stack->entries[i]);
     }
 }
 
