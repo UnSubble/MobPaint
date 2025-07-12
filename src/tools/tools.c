@@ -65,7 +65,7 @@ void use_tool(PaintContext* context, int prev_x, int prev_y) {
     }
 }
 
-char* get_tool_name(Tool* tool) {
+const char* get_tool_name(const Tool* tool) {
     switch (tool->type) {
     case TOOL_BRUSH:
         return "BRUSH";
