@@ -175,3 +175,23 @@
 [14:18:34] INFO: Window close event received.
 [14:18:34] INFO: App exited cleanly.
 [END] MobPaint session ended.
+[START] MobPaint session started.
+[14:38:48] INFO: Using default target path from config: /tmp/mobpaint_temp.dat
+[14:38:48] INFO: Running app with target file: /tmp/mobpaint_temp.dat
+[14:38:49] INFO: Drawing started at (138, 191).
+[14:38:52] INFO: Drawing stopped.
+[14:38:54] INFO: Window close event received.
+[14:38:54] INFO: App exited cleanly.
+[END] MobPaint session ended.
+[START] MobPaint session started.
+[14:38:56] INFO: Using default target path from config: /tmp/mobpaint_temp.dat
+[14:38:56] INFO: Running app with target file: /tmp/mobpaint_temp.dat
+[14:39:00] INFO: Drawing started at (56, 171).
+[14:39:01] INFO: Drawing stopped.
+[14:39:04] INFO: Drawing started at (587, 518).
+[14:39:04] INFO: Drawing stopped.
+[14:39:06] INFO: Drawing started at (576, 502).
+[14:39:09] INFO: Drawing stopped.
+[14:39:10] INFO: Window close event received.
+[14:39:10] INFO: App exited cleanly.
+[END] MobPaint session ended.

@@ -2,6 +2,7 @@
 #define TOOLS_H
 
 #include <SDL2/SDL.h>
+#include "config.h"
 
 typedef enum {
     TOOL_BRUSH,
@@ -18,7 +19,7 @@ typedef struct {
     int size;
 } Tool;
 
-void init_tool(Tool *tool);
+void init_tool(Tool *tool, Config *config);
 void set_tool_type(Tool *tool, ToolType type);
 void use_tool(SDL_Renderer *renderer, Tool *tool, int x, int y, int prev_x, int prev_y);
 char* get_tool_name(Tool *tool);

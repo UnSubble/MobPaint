@@ -1,0 +1,13 @@
+{
+  "log_dir": "logs",
+  "default_target_path": "/tmp/mobpaint_temp.dat",
+  "window": {
+    "width": 800,
+    "height": 600
+  },
+  "default_tool": "brush",
+  "brush": {
+    "size": 4,
+    "color": [0, 0, 0, 255]
+  }
+}

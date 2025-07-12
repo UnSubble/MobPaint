@@ -1,10 +1,10 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -Iinclude
-LDFLAGS = -lSDL2 -lpthread
+LDFLAGS = -lSDL2 -lpthread -lcjson
 
 # Source and output
-SRC = src/main.c src/logs.c src/app.c src/tools/tools.c
+SRC = src/*.c src/tools/*.c
 OUTDIR = out
 OUT = $(OUTDIR)/mobpaint
 

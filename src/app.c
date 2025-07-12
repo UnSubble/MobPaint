@@ -8,7 +8,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-int run_app(const char *target_file_path) {
+int run_app(const char *target_file_path, Config* config) {
     log_info("Running app with target file: %s", target_file_path);
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -40,7 +40,7 @@ int run_app(const char *target_file_path) {
     SDL_ShowWindow(window);
 
     Tool current_tool;
-    init_tool(&current_tool);
+    init_tool(&current_tool, config);
 
     bool running = true;
     bool drawing = false;
