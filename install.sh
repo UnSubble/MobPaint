@@ -5,7 +5,7 @@
 
 echo "[MobPaint] Installing dependencies..."
 
-sudo pacman -S --needed --noconfirm sdl2 sdl2_gfx
+sudo pacman -S --needed --noconfirm sdl2 sdl2_gfx cjson
 
 if [ $? -eq 0 ]; then
     echo "[MobPaint] ✅ Dependencies installed successfully."
