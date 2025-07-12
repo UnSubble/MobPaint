@@ -1,0 +1,140 @@
+#include "app.h"
+#include "logs.h"
+#include <SDL2/SDL.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define BRUSH_SIZE 4
+
+int run_app(const char *target_file_path) {
+    log_info("Running app with target file: %s", target_file_path);
+
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        log_error("SDL_Init Error: %s", SDL_GetError());
+        return 1;
+    }
+
+    // Create window hidden to avoid black flicker
+    SDL_Window *window = SDL_CreateWindow("MobPaint",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
+
+    if (!window) {
+        log_error("SDL_CreateWindow Error: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    if (!renderer) {
+        log_error("SDL_CreateRenderer Error: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Pre-render white background before showing window
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+    SDL_ShowWindow(window);  // Now safe to show without black flicker
+
+    bool running = true;
+    bool drawing = false;
+    bool needs_redraw = false;
+    int prev_x = -1, prev_y = -1;  // Track previous position for smooth drawing
+    SDL_Event event;
+
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    log_info("Window close event received.");
+                    running = false;
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        drawing = true;
+                        prev_x = event.button.x;
+                        prev_y = event.button.y;
+
+                        // Draw initial point
+                        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                        SDL_Rect brush = {prev_x - BRUSH_SIZE / 2, prev_y - BRUSH_SIZE / 2, BRUSH_SIZE, BRUSH_SIZE};
+                        SDL_RenderFillRect(renderer, &brush);
+                        needs_redraw = true;
+
+                        log_info("Drawing started at (%d, %d).", prev_x, prev_y);
+                    }
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        drawing = false;
+                        prev_x = -1;
+                        prev_y = -1;
+                        log_info("Drawing stopped.");
+                    }
+                    break;
+
+                case SDL_MOUSEMOTION:
+                    if (drawing && (event.motion.state & SDL_BUTTON_LMASK)) {
+                        int curr_x = event.motion.x;
+                        int curr_y = event.motion.y;
+
+                        // Draw line from previous position to current position for smooth drawing
+                        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+                        // Draw filled circle at current position
+                        SDL_Rect brush = {curr_x - BRUSH_SIZE / 2, curr_y - BRUSH_SIZE / 2, BRUSH_SIZE, BRUSH_SIZE};
+                        SDL_RenderFillRect(renderer, &brush);
+
+                        // If we have a previous position, draw line between points
+                        if (prev_x != -1 && prev_y != -1) {
+                            // Simple line drawing using SDL_RenderDrawLine
+                            SDL_RenderDrawLine(renderer, prev_x, prev_y, curr_x, curr_y);
+                        }
+
+                        needs_redraw = true;
+
+                        prev_x = curr_x;
+                        prev_y = curr_y;
+                    }
+                    break;
+
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        log_info("ESC pressed. Exiting.");
+                        running = false;
+                    } else if (event.key.keysym.sym == SDLK_c && (event.key.keysym.mod & KMOD_CTRL)) {
+                        // Clear canvas with Ctrl+C
+                        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                        SDL_RenderClear(renderer);
+                        needs_redraw = true;
+                        log_info("Canvas cleared.");
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if (needs_redraw) {
+            SDL_RenderPresent(renderer);
+            needs_redraw = false;
+        }
+
+        SDL_Delay(1);
+    }
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    log_info("App exited cleanly.");
+    return 0;
+}
