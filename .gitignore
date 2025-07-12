@@ -48,7 +48,6 @@ compile_commands.json
 .cache/
 /include-config-*
 /include-revision
-/Makefile
 .ninja_*
 *.ninja
 *.pc
