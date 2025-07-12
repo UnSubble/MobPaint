@@ -62,6 +62,19 @@ bool load_config(const char *filename, Config *config) {
     if (cJSON_IsObject(window)) {
         cJSON *width = cJSON_GetObjectItemCaseSensitive(window, "width");
         cJSON *height = cJSON_GetObjectItemCaseSensitive(window, "height");
+        cJSON *default_background = cJSON_GetObjectItemCaseSensitive(window, "default_background");
+        if (cJSON_IsArray(default_background) && cJSON_GetArraySize(default_background) == 4) {
+            cJSON *r = cJSON_GetArrayItem(default_background, 0);
+            cJSON *g = cJSON_GetArrayItem(default_background, 1);
+            cJSON *b = cJSON_GetArrayItem(default_background, 2);
+            cJSON *a = cJSON_GetArrayItem(default_background, 3);
+            if (cJSON_IsNumber(r) && cJSON_IsNumber(g) && cJSON_IsNumber(b) && cJSON_IsNumber(a)) {
+                config->default_background_color.r = (Uint8)r->valueint;
+                config->default_background_color.g = (Uint8)g->valueint;
+                config->default_background_color.b = (Uint8)b->valueint;
+                config->default_background_color.a = (Uint8)a->valueint;
+            }
+        }
         if (cJSON_IsNumber(width)) config->window_width = width->valueint;
         if (cJSON_IsNumber(height)) config->window_height = height->valueint;
     }

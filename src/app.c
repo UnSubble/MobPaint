@@ -34,7 +34,9 @@ int run_app(const char *target_file_path, Config* config) {
         return 1;
     }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Color background_color = config->default_background_color;
+
+    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
     SDL_ShowWindow(window);

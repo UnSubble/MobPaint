@@ -3,7 +3,8 @@
   "default_target_path": "/tmp/mobpaint_temp.dat",
   "window": {
     "width": 800,
-    "height": 600
+    "height": 600,
+    "default_background": [255, 255, 255, 255]
   },
   "default_tool": "brush",
   "brush": {

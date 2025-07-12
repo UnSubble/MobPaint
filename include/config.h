@@ -12,6 +12,7 @@ typedef struct {
     char default_tool[32];
     int brush_size;
     SDL_Color brush_color;
+    SDL_Color default_background_color;
 } Config;
 
 
