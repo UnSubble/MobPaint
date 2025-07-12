@@ -5,9 +5,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
-
 int run_app(const char *target_file_path, Config* config) {
     log_info("Running app with target file: %s", target_file_path);
 
@@ -16,9 +13,12 @@ int run_app(const char *target_file_path, Config* config) {
         return 1;
     }
 
+    int window_width = config->window_width;
+    int window_height = config->window_height;
+
     SDL_Window *window = SDL_CreateWindow("MobPaint",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_ALLOW_HIGHDPI);
+        window_width, window_height, SDL_WINDOW_ALLOW_HIGHDPI);
 
     if (!window) {
         log_error("SDL_CreateWindow Error: %s", SDL_GetError());
@@ -36,7 +36,8 @@ int run_app(const char *target_file_path, Config* config) {
 
     SDL_Color background_color = config->default_background_color;
 
-    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, background_color.b, background_color.a);
+    SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, 
+                                    background_color.b, background_color.a);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
     SDL_ShowWindow(window);
@@ -99,7 +100,8 @@ int run_app(const char *target_file_path, Config* config) {
                         running = false;
                     } else if (event.key.keysym.sym == SDLK_c && (event.key.keysym.mod & KMOD_CTRL)) {
                         // Clear canvas with Ctrl+C
-                        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                        SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g, 
+                                                        background_color.b, background_color.a);
                         SDL_RenderClear(renderer);
                         needs_redraw = true;
                         log_info("Canvas cleared.");
