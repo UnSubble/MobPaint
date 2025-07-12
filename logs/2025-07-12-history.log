@@ -154,3 +154,24 @@
 [13:38:18] INFO: Window close event received.
 [13:38:18] INFO: App exited cleanly.
 [END] MobPaint session ended.
+[START] MobPaint session started.
+[14:06:25] INFO: No target file specified, using temp file: /tmp/mobpaint_temp.dat
+[14:06:25] INFO: Running app with target file: /tmp/mobpaint_temp.dat
+[14:06:26] INFO: Drawing started at (256, 155).
+[14:06:30] INFO: Drawing stopped.
+[14:06:32] INFO: Window close event received.
+[14:06:32] INFO: App exited cleanly.
+[END] MobPaint session ended.
+[START] MobPaint session started.
+[14:18:24] INFO: No target file specified, using temp file: /tmp/mobpaint_temp.dat
+[14:18:24] INFO: Running app with target file: /tmp/mobpaint_temp.dat
+[14:18:25] INFO: Drawing started at (211, 167).
+[14:18:28] INFO: Drawing stopped.
+[14:18:28] INFO: Drawing started at (740, 368).
+[14:18:31] INFO: Drawing stopped.
+[14:18:32] INFO: Canvas cleared.
+[14:18:32] INFO: Drawing started at (177, 30).
+[14:18:33] INFO: Drawing stopped.
+[14:18:34] INFO: Window close event received.
+[14:18:34] INFO: App exited cleanly.
+[END] MobPaint session ended.

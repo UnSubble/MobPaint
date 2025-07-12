@@ -10,6 +10,8 @@ include_directories(include)
 set(SOURCES
         src/main.c
         src/logs.c
+        src/app.c
+        src/tools/tools.c
 )
 
 # Find SDL2 package
