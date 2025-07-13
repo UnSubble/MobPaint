@@ -40,6 +40,30 @@ void set_tool_type(Tool *tool, ToolType type) {
     }
 }
 
+void draw_thick_line(SDL_Renderer* renderer, int x1, int y1, int x2, int y2, int size) {
+    const float dx = x2 - x1;
+    const float dy = y2 - y1;
+    const float distance = SDL_sqrtf(dx * dx + dy * dy);
+
+    if (distance == 0) return;
+
+    const float step_x = dx / distance;
+    const float step_y = dy / distance;
+
+    for (float i = 0; i <= distance; i += 1.0f) {
+        int px = (int)(x1 + step_x * i);
+        int py = (int)(y1 + step_y * i);
+
+        SDL_Rect brush = {
+            px - size / 2,
+            py - size / 2,
+            size,
+            size
+        };
+        SDL_RenderFillRect(renderer, &brush);
+    }
+}
+
 void use_tool(PaintContext* context, int prev_x, int prev_y) {
     Tool *tool = &context->current_tool; 
     SDL_SetRenderDrawColor(context->renderer, tool->color.r, tool->color.g, tool->color.b, tool->color.a);
@@ -47,16 +71,16 @@ void use_tool(PaintContext* context, int prev_x, int prev_y) {
     switch (tool->type) {
     case TOOL_BRUSH:
     case TOOL_ERASER: {
-        SDL_Rect brush = {
-            context->mouse_x - tool->size / 2,
-            context->mouse_y - tool->size / 2,
-            tool->size,
-            tool->size
-        };
-        SDL_RenderFillRect(context->renderer, &brush);
-
         if (prev_x != -1 && prev_y != -1) {
-            SDL_RenderDrawLine(context->renderer, prev_x, prev_y, context->mouse_x, context->mouse_y);
+            draw_thick_line(context->renderer, prev_x, prev_y, context->mouse_x, context->mouse_y, tool->size);
+        } else {
+            SDL_Rect brush = {
+                context->mouse_x - tool->size / 2,
+                context->mouse_y - tool->size / 2,
+                tool->size,
+                tool->size
+            };
+            SDL_RenderFillRect(context->renderer, &brush);
         }
         break;
     }

@@ -50,6 +50,18 @@ void set_tool_type(Tool *tool, ToolType type);
 void use_tool(PaintContext *context, int prev_x, int prev_y);
 
 /**
+ * Draws a thick line between two points using the current renderer.
+ *
+ * @param renderer SDL renderer to use.
+ * @param x1       Starting X coordinate.
+ * @param y1       Starting Y coordinate.
+ * @param x2       Ending X coordinate.
+ * @param y2       Ending Y coordinate.
+ * @param size     Thickness of the line in pixels.
+ */
+void draw_thick_line(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int size);
+
+/**
  * Returns a human-readable name of the tool.
  *
  * @param tool Pointer to the Tool.

@@ -107,7 +107,7 @@ void update_tool(PaintContext *paint_context, Tool tool) {
 }
 
 void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
-    if (!renderer || !entry || entry->count < 2) 
+    if (!renderer || !entry) 
         return;
 
     SDL_SetRenderDrawColor(renderer,
@@ -116,14 +116,22 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
         entry->tool.color.b,
         entry->tool.color.a);
 
-    SDL_Rect rect;
-    rect.w = entry->tool.size;
-    rect.h = entry->tool.size;
-
-    for (int i = 0; i < entry->count; i++) {
-        rect.x = entry->points[i].x - rect.w / 2;
-        rect.y = entry->points[i].y - rect.h / 2;
+    Point *last = &entry->points[0];
+    
+    if (last->x >= 0 && last->y >= 0) {
+        SDL_Rect rect = {
+            .w = entry->tool.size,
+            .h = entry->tool.size,
+            .x = last->x - rect.w / 2,
+            .y = last->y - rect.h / 2,
+        };
         SDL_RenderFillRect(renderer, &rect);
+    }
+
+    for (int i = 1; i < entry->count; i++) {
+        Point *curr = &entry->points[i];
+        draw_thick_line(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
+        last = curr;
     }
 }
 

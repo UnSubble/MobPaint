@@ -85,6 +85,15 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_MOUSEBUTTONUP:
                     if (event.button.button == SDL_BUTTON_LEFT && drawing) {
                         drawing = false;
+
+                        int prev_x = context.mouse_x;
+                        int prev_y = context.mouse_y;
+                        context.mouse_x = event.button.x;
+                        context.mouse_y = event.button.y;
+
+                        add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                        use_tool(&context, prev_x, prev_y);
+
                         context.mouse_x = -1;
                         context.mouse_y = -1;
                         end_stroke(&context);
