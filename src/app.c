@@ -2,6 +2,7 @@
 #include "context/logs.h"
 #include "context/paint_context.h"
 #include "tools/tools.h"
+#include "sidebar.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -43,6 +44,7 @@ int run_app(const char *target_file_path, Config* config) {
     SDL_RenderPresent(renderer);
     SDL_ShowWindow(window);
 
+    
     PaintContext context;
     Tool current_tool;
     init_tool(&current_tool, config);
@@ -50,7 +52,7 @@ int run_app(const char *target_file_path, Config* config) {
 
     bool running = true;
     bool drawing = false;
-    bool needs_redraw = false;
+    bool needs_redraw = true;
     SDL_Event event;
 
     while (running) {
@@ -63,20 +65,25 @@ int run_app(const char *target_file_path, Config* config) {
 
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
-                        drawing = true;
-                        context.mouse_x = event.button.x;
-                        context.mouse_y = event.button.y;
+                        if (in_sidebar_bounds(event.button.x, event.button.y)) {
+                            handle_sidebar_click(&context, event.button.x, event.button.y);
+                        } else {
+                            drawing = true;
+                            context.mouse_x = event.button.x;
+                            context.mouse_y = event.button.y;
+                            
+                            use_tool(&context, -1, -1);
+                            start_stroke(&context);
 
-                        use_tool(&context, -1, -1);
+                            log_info("Drawing started at (%d, %d).", context.mouse_x, context.mouse_y);
+                        }
+
                         needs_redraw = true;
-                        start_stroke(&context);
-
-                        log_info("Drawing started at (%d, %d).", context.mouse_x, context.mouse_y);
                     }
                     break;
 
                 case SDL_MOUSEBUTTONUP:
-                    if (event.button.button == SDL_BUTTON_LEFT) {
+                    if (event.button.button == SDL_BUTTON_LEFT && drawing) {
                         drawing = false;
                         context.mouse_x = -1;
                         context.mouse_y = -1;
@@ -136,6 +143,7 @@ int run_app(const char *target_file_path, Config* config) {
         }
 
         if (needs_redraw) {
+            draw_left_sidebar(renderer, &context, config);
             SDL_RenderPresent(renderer);
             needs_redraw = false;
         }

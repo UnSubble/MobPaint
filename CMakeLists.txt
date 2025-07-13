@@ -7,9 +7,13 @@ include_directories(include)
 
 set(SOURCES
         src/main.c
-        src/logs.c
         src/app.c
+        src/sidebar.c
         src/tools/tools.c
+        src/context/logs.c
+        src/context/history.c
+        src/context/paint_context.c
+        src/context/config.c
 )
 
 find_package(SDL2 REQUIRED)
