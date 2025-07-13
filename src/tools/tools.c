@@ -7,6 +7,8 @@ ToolType get_tooltype_from_string(const char *tool_name) {
         return TOOL_BRUSH;
     } else if (strcasecmp(tool_name, "ERASER") == 0) {
         return TOOL_ERASER;
+    } else if (strcasecmp(tool_name, "LINE") == 0) {
+        return TOOL_LINE;
     } else {
         return -1;
     }
@@ -28,6 +30,7 @@ void set_tool_type(Tool *tool, ToolType type) {
     tool->type = type;
 
     switch (type) {
+    case TOOL_LINE:
     case TOOL_BRUSH:
         tool->color = (SDL_Color){0, 0, 0, 255};  // Black
         break;
@@ -84,6 +87,12 @@ void use_tool(PaintContext* context, int prev_x, int prev_y) {
         }
         break;
     }
+    case TOOL_LINE: {
+        if (prev_x != -1 && prev_y != -1 && context->mouse_x != -1 && context->mouse_y != -1) {
+            draw_thick_line(context->renderer, prev_x, prev_y, context->mouse_x, context->mouse_y, tool->size);
+        }
+        break;
+    }
     default:
         break;
     }
@@ -95,6 +104,8 @@ const char* get_tool_name(const Tool* tool) {
         return "BRUSH";
     case TOOL_ERASER:
         return "ERASER";
+    case TOOL_LINE:
+        return "LINE";
     default:
         return "UNKNOWN";
     }

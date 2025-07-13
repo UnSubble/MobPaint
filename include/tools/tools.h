@@ -10,7 +10,7 @@ typedef struct PaintContext PaintContext;
 typedef enum {
     TOOL_BRUSH,
     TOOL_ERASER,
-    // TOOL_LINE,
+    TOOL_LINE,
     // TOOL_RECT,
     // TOOL_FILL,
     // TOOL_COUNT

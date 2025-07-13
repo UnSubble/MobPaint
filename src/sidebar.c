@@ -12,12 +12,28 @@ void draw_left_sidebar(SDL_Renderer *renderer, PaintContext *context, Config* co
 
     SDL_Rect brush_btn = {TOOL_BTN_X, TOOL_BTN_Y_START, TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
     SDL_Rect eraser_btn = {TOOL_BTN_X, TOOL_BTN_Y_START + TOOL_BTN_HEIGHT + TOOL_BTN_SPACING, TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
+    SDL_Rect line_btn = {TOOL_BTN_X, TOOL_BTN_Y_START + 2 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING), TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
 
     SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
     SDL_RenderFillRect(renderer, &brush_btn);
     SDL_RenderFillRect(renderer, &eraser_btn);
+    SDL_RenderFillRect(renderer, &line_btn);
 
-    SDL_Rect *selected = context->current_tool.type == TOOL_BRUSH ? &brush_btn : &eraser_btn;
+    SDL_Rect *selected = NULL;
+    switch (context->current_tool.type)
+    {
+    case TOOL_BRUSH:
+        selected = &brush_btn;
+        break;
+    case TOOL_ERASER:
+        selected = &eraser_btn;
+        break;
+    case TOOL_LINE:
+        selected = &line_btn;
+        break;
+    default:
+        break;
+    }
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
     SDL_RenderDrawRect(renderer, selected);
 }
@@ -27,7 +43,10 @@ void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y) {
         return;
 
     if (mouse_x >= TOOL_BTN_X && mouse_x <= TOOL_BTN_X + TOOL_BTN_WIDTH) {
-        if (mouse_y >= TOOL_BTN_Y_START && mouse_y <= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT) {
+        if (mouse_y >= TOOL_BTN_Y_START + 2 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) && 
+                mouse_y <= TOOL_BTN_Y_START + 3 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING)) {
+            set_tool_type(&context->current_tool, TOOL_LINE);
+        }else if (mouse_y >= TOOL_BTN_Y_START && mouse_y <= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT) {
             set_tool_type(&context->current_tool, TOOL_BRUSH);
         } else if (mouse_y >= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT + TOOL_BTN_SPACING &&
                    mouse_y <= TOOL_BTN_Y_START + 2 * TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) {

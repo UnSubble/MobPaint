@@ -71,13 +71,17 @@ int run_app(const char *target_file_path, Config* config) {
                             drawing = true;
                             context.mouse_x = event.button.x;
                             context.mouse_y = event.button.y;
-                            
-                            use_tool(&context, -1, -1);
-                            start_stroke(&context);
+
+                            if (context.current_tool.type == TOOL_LINE) {
+                                start_stroke(&context);
+                                add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                            } else {
+                                use_tool(&context, -1, -1);
+                                start_stroke(&context);
+                            }
 
                             log_info("Drawing started at (%d, %d).", context.mouse_x, context.mouse_y);
                         }
-
                         needs_redraw = true;
                     }
                     break;
@@ -85,14 +89,25 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_MOUSEBUTTONUP:
                     if (event.button.button == SDL_BUTTON_LEFT && drawing) {
                         drawing = false;
+                        int prev_x = -1, prev_y = -1;
 
-                        int prev_x = context.mouse_x;
-                        int prev_y = context.mouse_y;
-                        context.mouse_x = event.button.x;
-                        context.mouse_y = event.button.y;
+                        if (context.current_tool.type == TOOL_LINE) {
+                            prev_x = context.current_stroke->points[0].x;
+                            prev_y = context.current_stroke->points[0].y;
 
-                        add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
-                        use_tool(&context, prev_x, prev_y);
+                            context.mouse_x = event.button.x;
+                            context.mouse_y = event.button.y;
+
+                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                            use_tool(&context, prev_x, prev_y);
+                        } else {
+                            prev_x = context.mouse_x;
+                            prev_y = context.mouse_y;
+                            context.mouse_x = event.button.x;
+                            context.mouse_y = event.button.y;
+                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                            use_tool(&context, prev_x, prev_y);
+                        }
 
                         context.mouse_x = -1;
                         context.mouse_y = -1;
@@ -109,9 +124,11 @@ int run_app(const char *target_file_path, Config* config) {
                         context.mouse_x = event.motion.x;
                         context.mouse_y = event.motion.y;
 
-                        add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
-                        use_tool(&context, prev_x, prev_y);
-                        needs_redraw = true;
+                        if (context.current_tool.type != TOOL_LINE) {
+                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                            use_tool(&context, prev_x, prev_y);
+                            needs_redraw = true;
+                        }
                     }
                     break;
 
@@ -143,6 +160,9 @@ int run_app(const char *target_file_path, Config* config) {
                     } else if (event.key.keysym.sym == SDLK_2) {
                         set_tool_type(&context.current_tool, TOOL_ERASER);
                         log_info("Tool switched to ERASER.");
+                    } else if (event.key.keysym.sym == SDLK_3) {
+                        set_tool_type(&context.current_tool, TOOL_LINE);
+                        log_info("Tool switched to LINE.");
                     }
                     break;
 
