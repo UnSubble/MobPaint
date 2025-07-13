@@ -46,7 +46,7 @@ void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y) {
         if (mouse_y >= TOOL_BTN_Y_START + 2 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) && 
                 mouse_y <= TOOL_BTN_Y_START + 3 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING)) {
             set_tool_type(&context->current_tool, TOOL_LINE);
-        }else if (mouse_y >= TOOL_BTN_Y_START && mouse_y <= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT) {
+        } else if (mouse_y >= TOOL_BTN_Y_START && mouse_y <= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT) {
             set_tool_type(&context->current_tool, TOOL_BRUSH);
         } else if (mouse_y >= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT + TOOL_BTN_SPACING &&
                    mouse_y <= TOOL_BTN_Y_START + 2 * TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) {

@@ -72,7 +72,7 @@ int run_app(const char *target_file_path, Config* config) {
                             context.mouse_x = event.button.x;
                             context.mouse_y = event.button.y;
 
-                            if (context.current_tool.type == TOOL_LINE) {
+                            if (context.current_tool.type == TOOL_LINE || context.current_tool.type == TOOL_CIRCLE) {
                                 start_stroke(&context);
                                 add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
                             } else {
@@ -91,7 +91,7 @@ int run_app(const char *target_file_path, Config* config) {
                         drawing = false;
                         int prev_x = -1, prev_y = -1;
 
-                        if (context.current_tool.type == TOOL_LINE) {
+                        if (context.current_tool.type == TOOL_LINE || context.current_tool.type == TOOL_CIRCLE) {
                             prev_x = context.current_stroke->points[0].x;
                             prev_y = context.current_stroke->points[0].y;
 
@@ -124,7 +124,7 @@ int run_app(const char *target_file_path, Config* config) {
                         context.mouse_x = event.motion.x;
                         context.mouse_y = event.motion.y;
 
-                        if (context.current_tool.type != TOOL_LINE) {
+                        if (context.current_tool.type != TOOL_LINE && context.current_tool.type != TOOL_CIRCLE) {
                             add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
                             use_tool(&context, prev_x, prev_y);
                             needs_redraw = true;
@@ -163,6 +163,9 @@ int run_app(const char *target_file_path, Config* config) {
                     } else if (event.key.keysym.sym == SDLK_3) {
                         set_tool_type(&context.current_tool, TOOL_LINE);
                         log_info("Tool switched to LINE.");
+                    } else if (event.key.keysym.sym == SDLK_4) {
+                        set_tool_type(&context.current_tool, TOOL_CIRCLE);
+                        log_info("Tool switched to CIRCLE.");
                     }
                     break;
 

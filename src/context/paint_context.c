@@ -128,10 +128,27 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
         SDL_RenderFillRect(renderer, &rect);
     }
 
-    for (int i = 1; i < entry->count; i++) {
-        Point *curr = &entry->points[i];
-        draw_thick_line(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
-        last = curr;
+    switch (entry->tool.type)
+    {
+    case TOOL_BRUSH:
+    case TOOL_ERASER:
+    case TOOL_LINE: {
+        for (int i = 1; i < entry->count; i++) {
+            Point *curr = &entry->points[i];
+            draw_thick_line(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
+            last = curr;
+        }
+        break;
+    }
+    case TOOL_CIRCLE: {
+        for (int i = 1; i < entry->count; i++) {
+            Point *curr = &entry->points[i];
+            draw_thick_circle(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
+            last = curr;
+        }
+    }
+    default:
+        break;
     }
 }
 

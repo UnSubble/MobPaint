@@ -11,6 +11,7 @@ typedef enum {
     TOOL_BRUSH,
     TOOL_ERASER,
     TOOL_LINE,
+    TOOL_CIRCLE
     // TOOL_RECT,
     // TOOL_FILL,
     // TOOL_COUNT
@@ -60,6 +61,18 @@ void use_tool(PaintContext *context, int prev_x, int prev_y);
  * @param size     Thickness of the line in pixels.
  */
 void draw_thick_line(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int size);
+
+/**
+ * Draws a thick circle between two points using the current renderer.
+ *
+ * @param renderer SDL renderer to use.
+ * @param x1       Starting X coordinate.
+ * @param y1       Starting Y coordinate.
+ * @param x2       Ending X coordinate.
+ * @param y2       Ending Y coordinate.
+ * @param size     Thickness of the circle in pixels.
+ */
+void draw_thick_circle(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int size);
 
 /**
  * Returns a human-readable name of the tool.
