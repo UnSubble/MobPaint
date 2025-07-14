@@ -76,8 +76,8 @@ int run_app(const char *target_file_path, Config* config) {
                                 start_stroke(&context);
                                 add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
                             } else {
-                                use_tool(&context, -1, -1);
                                 start_stroke(&context);
+                                use_tool(&context, -1, -1);
                             }
 
                             log_info("Drawing started at (%d, %d).", context.mouse_x, context.mouse_y);
@@ -98,14 +98,12 @@ int run_app(const char *target_file_path, Config* config) {
                             context.mouse_x = event.button.x;
                             context.mouse_y = event.button.y;
 
-                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
                             use_tool(&context, prev_x, prev_y);
-                        } else {
+                        } else if (context.current_tool.type != TOOL_FILL) {
                             prev_x = context.mouse_x;
                             prev_y = context.mouse_y;
                             context.mouse_x = event.button.x;
                             context.mouse_y = event.button.y;
-                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
                             use_tool(&context, prev_x, prev_y);
                         }
 
@@ -124,8 +122,8 @@ int run_app(const char *target_file_path, Config* config) {
                         context.mouse_x = event.motion.x;
                         context.mouse_y = event.motion.y;
 
-                        if (context.current_tool.type != TOOL_LINE && context.current_tool.type != TOOL_CIRCLE) {
-                            add_point_to_current_stroke(&context, context.mouse_x, context.mouse_y);
+                        if (context.current_tool.type != TOOL_LINE && context.current_tool.type != TOOL_CIRCLE 
+                                    && context.current_tool.type != TOOL_FILL) {
                             use_tool(&context, prev_x, prev_y);
                             needs_redraw = true;
                         }
@@ -166,6 +164,9 @@ int run_app(const char *target_file_path, Config* config) {
                     } else if (event.key.keysym.sym == SDLK_4) {
                         set_tool_type(&context.current_tool, TOOL_CIRCLE);
                         log_info("Tool switched to CIRCLE.");
+                    } else if (event.key.keysym.sym == SDLK_5) {
+                        set_tool_type(&context.current_tool, TOOL_FILL);
+                        log_info("Tool switched to FILL.");
                     }
                     break;
 

@@ -146,6 +146,15 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
             draw_thick_circle(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
             last = curr;
         }
+        break;
+    }
+    case TOOL_FILL: {
+        for (int i = 1; i < entry->count; i++) {
+            Point *curr = &entry->points[i];
+            SDL_RenderDrawPoint(renderer, curr->x, curr->y);
+            last = curr;
+        }
+        break;
     }
     default:
         break;

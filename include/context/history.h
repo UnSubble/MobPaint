@@ -6,7 +6,7 @@
 #include "tools/tools.h"
 
 // Represents a 2D coordinate on the canvas
-typedef struct {
+typedef struct Point {
     int x;
     int y;
 } Point;

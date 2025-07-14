@@ -6,79 +6,96 @@
 
 typedef struct PaintContext PaintContext;
 
-// Supported tool types enumeration
+typedef struct Point Point;
+
+// Supported drawing tool types
 typedef enum {
     TOOL_BRUSH,
     TOOL_ERASER,
     TOOL_LINE,
-    TOOL_CIRCLE
+    TOOL_CIRCLE,
+    TOOL_FILL
     // TOOL_RECT,
-    // TOOL_FILL,
     // TOOL_COUNT
 } ToolType;
 
-// Tool structure holding type, color, and size information
-typedef struct {
-    ToolType type;   // Tool type (brush, eraser, etc.)
-    SDL_Color color; // Tool color
-    int size;        // Tool size (e.g., brush size)
+// Represents the current drawing tool's configuration
+typedef struct Tool {
+    ToolType type;      // Tool type (e.g., brush, eraser)
+    SDL_Color color;    // Tool color
+    int size;           // Tool size or thickness
 } Tool;
 
 /**
- * Initializes the given Tool based on configuration defaults.
+ * Initializes the given Tool using default values from configuration.
  *
  * @param tool   Pointer to the Tool to initialize.
- * @param config Pointer to the Config struct with default settings.
+ * @param config Pointer to the configuration struct.
  */
 void init_tool(Tool *tool, const Config *config);
 
 /**
- * Changes the Tool's type and adjusts properties accordingly.
+ * Updates the tool type and adjusts internal state if needed.
  *
  * @param tool Pointer to the Tool to modify.
- * @param type New tool type.
+ * @param type New ToolType value to apply.
  */
 void set_tool_type(Tool *tool, ToolType type);
 
 /**
- * Applies the tool's effect on the PaintContext.
- * Usually called when drawing or erasing between points.
+ * Applies the current tool’s effect to the canvas via PaintContext.
+ * Used for real-time drawing actions.
  *
  * @param context Pointer to the PaintContext.
- * @param prev_x  Previous X coordinate (for line interpolation).
+ * @param prev_x  Previous X coordinate (used for interpolation).
  * @param prev_y  Previous Y coordinate.
  */
 void use_tool(PaintContext *context, int prev_x, int prev_y);
 
 /**
- * Draws a thick line between two points using the current renderer.
+ * Draws a thick line between two points with the specified size.
  *
  * @param renderer SDL renderer to use.
- * @param x1       Starting X coordinate.
- * @param y1       Starting Y coordinate.
- * @param x2       Ending X coordinate.
- * @param y2       Ending Y coordinate.
- * @param size     Thickness of the line in pixels.
+ * @param x1       Start X position.
+ * @param y1       Start Y position.
+ * @param x2       End X position.
+ * @param y2       End Y position.
+ * @param size     Line thickness.
  */
 void draw_thick_line(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int size);
 
 /**
- * Draws a thick circle between two points using the current renderer.
+ * Draws a thick circle outline between two points using bounding box logic.
  *
  * @param renderer SDL renderer to use.
- * @param x1       Starting X coordinate.
- * @param y1       Starting Y coordinate.
- * @param x2       Ending X coordinate.
- * @param y2       Ending Y coordinate.
- * @param size     Thickness of the circle in pixels.
+ * @param x1       First point (defines center/radius).
+ * @param y1       First point.
+ * @param x2       Second point (defines radius).
+ * @param y2       Second point.
+ * @param size     Circle outline thickness.
  */
 void draw_thick_circle(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int size);
 
 /**
- * Returns a human-readable name of the tool.
+ * Performs flood fill (bucket fill) operation starting at a given pixel.
+ * Optionally outputs the filled pixels list via `out_points`.
+ *
+ * @param renderer     SDL renderer (target canvas).
+ * @param start_x      X coordinate to start filling.
+ * @param start_y      Y coordinate to start filling.
+ * @param target_color Color to be replaced.
+ * @param fill_color   Fill color to apply.
+ * @param out_points   Optional output: pointer to an array of filled points (can be NULL).
+ * @return             Number of pixels filled, or -1 on error.
+ */
+int flood_fill(SDL_Renderer *renderer, int start_x, int start_y,
+               SDL_Color target_color, SDL_Color fill_color, Point **out_points);
+
+/**
+ * Returns a human-readable name string for the given tool.
  *
  * @param tool Pointer to the Tool.
- * @return Pointer to a static string with the tool name.
+ * @return     Static string describing the tool (e.g., "Brush").
  */
 const char* get_tool_name(const Tool *tool);
 
