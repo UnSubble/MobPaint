@@ -63,18 +63,31 @@ make
 
 ## 🗂️ Project Structure
 
+
 MobPaint/
+
 ├── src/             # Application source code
+
 │   ├── context/     # Logging, config, paint state
+
 │   ├── tools/       # Brush, eraser, etc.
+
 ├── include/         # Public headers
+
 ├── logs/            # Runtime logs (errors + history)
+
 ├── assets/          # UI assets (future support)
+
 ├── install.sh       # Cross-distro dependency installer
+
 ├── Makefile         # Simple build system
+
 ├── CMakeLists.txt   # CMake build system
+
 ├── LICENSE          # MIT License
+
 └── README.md        # This file
+
 
 ---
 
@@ -94,9 +107,11 @@ Log files:
 ## 👤 Author
 
 MobPaint is developed and maintained by [UnSubble](https://github.com/UnSubble).
+
 Feel free to reach out with feature requests or bug reports!
 
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
+
 See the LICENSE file for details.
