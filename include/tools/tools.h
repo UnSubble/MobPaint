@@ -10,11 +10,12 @@ typedef struct Point Point;
 
 // Supported drawing tool types
 typedef enum {
-    TOOL_BRUSH,
-    TOOL_ERASER,
-    TOOL_LINE,
-    TOOL_CIRCLE,
-    TOOL_FILL
+    TOOL_BRUSH = 0,
+    TOOL_ERASER = 1,
+    TOOL_LINE = 2,
+    TOOL_CIRCLE = 3,
+    TOOL_FILL = 4,
+    TOOL_COUNT = 5, // Always at the bottom
     // TOOL_RECT,
     // TOOL_COUNT
 } ToolType;

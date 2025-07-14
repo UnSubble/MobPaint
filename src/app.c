@@ -152,21 +152,10 @@ int run_app(const char *target_file_path, Config* config) {
                             redraw_canvas(&context);
                             needs_redraw = true;
                         }
-                    } else if (event.key.keysym.sym == SDLK_1) {
-                        set_tool_type(&context.current_tool, TOOL_BRUSH);
-                        log_info("Tool switched to BRUSH.");
-                    } else if (event.key.keysym.sym == SDLK_2) {
-                        set_tool_type(&context.current_tool, TOOL_ERASER);
-                        log_info("Tool switched to ERASER.");
-                    } else if (event.key.keysym.sym == SDLK_3) {
-                        set_tool_type(&context.current_tool, TOOL_LINE);
-                        log_info("Tool switched to LINE.");
-                    } else if (event.key.keysym.sym == SDLK_4) {
-                        set_tool_type(&context.current_tool, TOOL_CIRCLE);
-                        log_info("Tool switched to CIRCLE.");
-                    } else if (event.key.keysym.sym == SDLK_5) {
-                        set_tool_type(&context.current_tool, TOOL_FILL);
-                        log_info("Tool switched to FILL.");
+                    } else if (event.key.keysym.sym >= SDLK_1 && event.key.keysym.sym < SDLK_1 + TOOL_COUNT) {
+                        ToolType tool_type = event.key.keysym.sym - SDLK_1;
+                        set_tool_type(&context.current_tool, tool_type);
+                        log_info("Tool switched to %s.", get_tool_name(&context.current_tool));
                     }
                     break;
 
