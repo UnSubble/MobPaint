@@ -9,6 +9,7 @@
 
 // Sidebar dimensions
 #define SIDEBAR_WIDTH         80
+#define TOPBAR_HEIGHT         30
 
 // Tool button layout in sidebar
 #define TOOL_BTN_X            10

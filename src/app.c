@@ -156,6 +156,7 @@ int run_app(const char *target_file_path, Config* config) {
                         ToolType tool_type = event.key.keysym.sym - SDLK_1;
                         set_tool_type(&context.current_tool, tool_type);
                         log_info("Tool switched to %s.", get_tool_name(&context.current_tool));
+                        needs_redraw = true;
                     }
                     break;
 

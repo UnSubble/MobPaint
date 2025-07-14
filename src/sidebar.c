@@ -2,55 +2,56 @@
 #include <SDL2/SDL.h>
 
 bool in_sidebar_bounds(int x, int y) {
-    return x < SIDEBAR_WIDTH;
+    return x < SIDEBAR_WIDTH || y < TOPBAR_HEIGHT;
+}
+
+SDL_Rect *add_new_button(SDL_Renderer *renderer, SDL_Rect *last) {
+    int last_y = TOOL_BTN_Y_START + TOPBAR_HEIGHT;
+    if (last)
+        last_y = last->y + TOOL_BTN_SPACING + TOOL_BTN_HEIGHT;
+    SDL_Rect *new_button =  malloc(sizeof(SDL_Rect));
+    new_button->x = TOOL_BTN_X;
+    new_button->y = last_y;
+    new_button->w = TOOL_BTN_WIDTH;
+    new_button->h = TOOL_BTN_HEIGHT;
+    SDL_RenderFillRect(renderer, new_button);
+    return new_button;
 }
 
 void draw_left_sidebar(SDL_Renderer *renderer, PaintContext *context, Config* config) {
     SDL_Rect sidebar = {0, 0, SIDEBAR_WIDTH, config->window_height};
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
     SDL_RenderFillRect(renderer, &sidebar);
-
-    SDL_Rect brush_btn = {TOOL_BTN_X, TOOL_BTN_Y_START, TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
-    SDL_Rect eraser_btn = {TOOL_BTN_X, TOOL_BTN_Y_START + TOOL_BTN_HEIGHT + TOOL_BTN_SPACING, TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
-    SDL_Rect line_btn = {TOOL_BTN_X, TOOL_BTN_Y_START + 2 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING), TOOL_BTN_WIDTH, TOOL_BTN_HEIGHT};
-
     SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-    SDL_RenderFillRect(renderer, &brush_btn);
-    SDL_RenderFillRect(renderer, &eraser_btn);
-    SDL_RenderFillRect(renderer, &line_btn);
 
     SDL_Rect *selected = NULL;
-    switch (context->current_tool.type)
-    {
-    case TOOL_BRUSH:
-        selected = &brush_btn;
-        break;
-    case TOOL_ERASER:
-        selected = &eraser_btn;
-        break;
-    case TOOL_LINE:
-        selected = &line_btn;
-        break;
-    default:
-        break;
+    SDL_Rect *last_btn = NULL;
+
+    for (int i = 0; i < TOOL_COUNT; i++) {
+        SDL_Rect *btn = add_new_button(renderer, last_btn);
+        if (context->current_tool.type == (ToolType)i) {
+            selected = btn;
+        }
+        last_btn = btn;
     }
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-    SDL_RenderDrawRect(renderer, selected);
+
+    if (selected) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+        SDL_RenderDrawRect(renderer, selected);
+    }
 }
 
 void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y) {
-    if (mouse_x > SIDEBAR_WIDTH)
+    if (mouse_x > SIDEBAR_WIDTH || mouse_x < TOOL_BTN_X ||
+        mouse_x > TOOL_BTN_X + TOOL_BTN_WIDTH || mouse_y < TOOL_BTN_Y_START + TOPBAR_HEIGHT)
         return;
 
-    if (mouse_x >= TOOL_BTN_X && mouse_x <= TOOL_BTN_X + TOOL_BTN_WIDTH) {
-        if (mouse_y >= TOOL_BTN_Y_START + 2 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) && 
-                mouse_y <= TOOL_BTN_Y_START + 3 * (TOOL_BTN_HEIGHT + TOOL_BTN_SPACING)) {
-            set_tool_type(&context->current_tool, TOOL_LINE);
-        } else if (mouse_y >= TOOL_BTN_Y_START && mouse_y <= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT) {
-            set_tool_type(&context->current_tool, TOOL_BRUSH);
-        } else if (mouse_y >= TOOL_BTN_Y_START + TOOL_BTN_HEIGHT + TOOL_BTN_SPACING &&
-                   mouse_y <= TOOL_BTN_Y_START + 2 * TOOL_BTN_HEIGHT + TOOL_BTN_SPACING) {
-            set_tool_type(&context->current_tool, TOOL_ERASER);
-        }
+    int relative_y = mouse_y - (TOOL_BTN_Y_START + TOPBAR_HEIGHT);
+    int total_height = TOOL_BTN_HEIGHT + TOOL_BTN_SPACING;
+
+    int clicked_index = relative_y / total_height;
+
+    if (clicked_index >= 0 && clicked_index < TOOL_COUNT) {
+        set_tool_type(&context->current_tool, (ToolType)clicked_index);
     }
 }
