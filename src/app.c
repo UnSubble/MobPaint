@@ -152,6 +152,12 @@ int run_app(const char *target_file_path, Config* config) {
                             redraw_canvas(&context);
                             needs_redraw = true;
                         }
+                    } else if (event.key.keysym.sym == SDLK_i && (event.key.keysym.mod & KMOD_CTRL)) {
+                        if (context.current_tool.size < 50)
+                            ++context.current_tool.size;
+                    } else if (event.key.keysym.sym == SDLK_o && (event.key.keysym.mod & KMOD_CTRL)) {
+                        if (context.current_tool.size > 1)
+                            --context.current_tool.size;
                     } else if (event.key.keysym.sym >= SDLK_1 && event.key.keysym.sym < SDLK_1 + TOOL_COUNT) {
                         ToolType tool_type = event.key.keysym.sym - SDLK_1;
                         set_tool_type(&context.current_tool, tool_type);
