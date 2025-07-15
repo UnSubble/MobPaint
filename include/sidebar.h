@@ -18,6 +18,11 @@
 #define TOOL_BTN_HEIGHT       60
 #define TOOL_BTN_SPACING      10
 
+// Tool button layout in topbar
+#define TOPBAR_BTN_WIDTH      80
+#define TOPBAR_BTN_HEIGHT     30
+#define TOPBAR_BTN_SPACING    10
+
 /**
  * Checks if the given (x, y) position is within the left sidebar area.
  *
@@ -45,5 +50,15 @@ void draw_left_sidebar(SDL_Renderer *renderer, PaintContext *context, Config *co
  * @param mouse_y Mouse Y coordinate.
  */
 void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y);
+
+/**
+ * Draws the top bar within the sidebar module.
+ */
+void draw_topbar(SDL_Renderer *renderer, PaintContext *context, Config *config);
+
+/**
+ * Handles click events within the top bar area.
+ */
+void handle_topbar_click(PaintContext *context, int mouse_x, int mouse_y);
 
 #endif // SIDEBAR_H

@@ -66,7 +66,10 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         if (in_sidebar_bounds(event.button.x, event.button.y)) {
-                            handle_sidebar_click(&context, event.button.x, event.button.y);
+                            if (event.button.x < SIDEBAR_WIDTH)
+                                handle_sidebar_click(&context, event.button.x, event.button.y);
+                            if (event.button.y < TOPBAR_HEIGHT)
+                                handle_topbar_click(&context, event.button.x, event.button.y);
                         } else {
                             drawing = true;
                             context.mouse_x = event.button.x;
@@ -172,6 +175,7 @@ int run_app(const char *target_file_path, Config* config) {
         }
 
         if (needs_redraw) {
+            draw_topbar(renderer, &context, config);
             draw_left_sidebar(renderer, &context, config);
             SDL_RenderPresent(renderer);
             needs_redraw = false;
