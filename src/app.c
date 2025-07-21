@@ -3,9 +3,12 @@
 #include "context/paint_context.h"
 #include "tools/tools.h"
 #include "sidebar.h"
+#include "assets.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+Assets *global_assets = NULL;
 
 int run_app(const char *target_file_path, Config* config) {
     log_info("Running app with target file: %s", target_file_path);
@@ -44,6 +47,7 @@ int run_app(const char *target_file_path, Config* config) {
     SDL_RenderPresent(renderer);
     SDL_ShowWindow(window);
 
+    global_assets = load_assets(renderer);
     
     PaintContext context;
     Tool current_tool;
@@ -185,6 +189,7 @@ int run_app(const char *target_file_path, Config* config) {
     }
 
     free_paint_context(&context);
+    free_assets(global_assets);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

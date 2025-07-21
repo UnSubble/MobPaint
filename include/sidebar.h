@@ -6,6 +6,7 @@
 #include "tools/tools.h"
 #include "context/paint_context.h"
 #include "context/config.h"
+#include "assets.h"
 
 // Sidebar dimensions
 #define SIDEBAR_WIDTH         80
@@ -19,9 +20,11 @@
 #define TOOL_BTN_SPACING      10
 
 // Tool button layout in topbar
-#define TOPBAR_BTN_WIDTH      80
+#define TOPBAR_BTN_WIDTH      30
 #define TOPBAR_BTN_HEIGHT     30
 #define TOPBAR_BTN_SPACING    10
+
+extern Assets *global_assets;
 
 /**
  * Checks if the given (x, y) position is within the left sidebar area.
