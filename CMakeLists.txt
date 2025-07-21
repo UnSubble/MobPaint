@@ -25,6 +25,9 @@ find_package(SDL2 REQUIRED)
 find_path(SDL2_GFX_INCLUDE_DIR SDL2_gfxPrimitives.h)
 find_library(SDL2_GFX_LIBRARY NAMES SDL2_gfx)
 
+# Find SDL2_image
+find_package(SDL2_image REQUIRED)
+
 # Find cJSON
 find_path(CJSON_INCLUDE_DIR cjson/cJSON.h)
 find_library(CJSON_LIBRARY NAMES cjson)
@@ -32,6 +35,7 @@ find_library(CJSON_LIBRARY NAMES cjson)
 # Include dirs
 include_directories(
     ${SDL2_INCLUDE_DIRS}
+    ${SDL2_IMAGE_INCLUDE_DIRS}
     ${SDL2_GFX_INCLUDE_DIR}
     ${CJSON_INCLUDE_DIR}
 )
@@ -42,6 +46,7 @@ add_executable(mobpaint ${SOURCES})
 # Link libraries
 target_link_libraries(mobpaint
     ${SDL2_LIBRARIES}
+    ${SDL2_IMAGE_LIBRARIES}
     ${SDL2_GFX_LIBRARY}
     ${CJSON_LIBRARY}
     pthread

@@ -3,7 +3,7 @@
 # MobPaint Multi-Distro Dependency Installer
 # Usage: chmod +x install.sh && ./install.sh
 
-DEPENDENCIES=("sdl2" "sdl2_gfx" "cjson")
+DEPENDENCIES=("sdl2" "sdl2_gfx" "sdl2_image" "cjson")
 
 echo "[MobPaint] Detecting Linux distribution..."
 
@@ -18,17 +18,17 @@ install_with_pacman() {
 install_with_apt() {
     echo "[MobPaint] Updating apt and installing dependencies..."
     sudo apt update
-    sudo apt install -y libsdl2-dev libsdl2-gfx-dev libcjson-dev
+    sudo apt install -y libsdl2-dev libsdl2-gfx-dev libsdl2-image-dev libcjson-dev
 }
 
 install_with_dnf() {
     echo "[MobPaint] Installing dependencies with dnf..."
-    sudo dnf install -y SDL2-devel SDL2_gfx-devel cjson-devel
+    sudo dnf install -y SDL2-devel SDL2_gfx-devel SDL2_image-devel cjson-devel
 }
 
 install_with_zypper() {
     echo "[MobPaint] Installing dependencies with zypper..."
-    sudo zypper install -y libSDL2-devel libSDL2_gfx-devel libcjson-devel
+    sudo zypper install -y libSDL2-devel libSDL2_gfx-devel libSDL2_image-devel libcjson-devel
 }
 
 case "$DISTRO_ID" in
@@ -49,6 +49,7 @@ case "$DISTRO_ID" in
         echo "Please install the following dependencies manually:"
         echo "  - SDL2"
         echo "  - SDL2_gfx"
+        echo "  - SDL2_image"
         echo "  - cJSON"
         exit 1
         ;;
