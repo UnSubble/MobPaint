@@ -24,6 +24,7 @@ file(GLOB_RECURSE SOURCES
 find_package(SDL2 REQUIRED)
 find_path(SDL2_GFX_INCLUDE_DIR SDL2_gfxPrimitives.h)
 find_library(SDL2_GFX_LIBRARY NAMES SDL2_gfx)
+find_package(SDL2_ttf REQUIRED)
 
 # Find SDL2_image
 find_package(SDL2_image REQUIRED)
@@ -37,6 +38,7 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_IMAGE_INCLUDE_DIRS}
     ${SDL2_GFX_INCLUDE_DIR}
+    ${SDL2_TTF_INCLUDE_DIRS}
     ${CJSON_INCLUDE_DIR}
 )
 
@@ -48,6 +50,7 @@ target_link_libraries(mobpaint
     ${SDL2_LIBRARIES}
     ${SDL2_IMAGE_LIBRARIES}
     ${SDL2_GFX_LIBRARY}
+    ${SDL2_TTF_LIBRARIES}
     ${CJSON_LIBRARY}
     pthread
 )

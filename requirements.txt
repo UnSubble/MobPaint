@@ -1,5 +1,6 @@
 sdl2
 sdl2_gfx
 sdl2_image
+sdl2_ttf
 gcc or clang
 cjson

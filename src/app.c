@@ -5,6 +5,7 @@
 #include "sidebar.h"
 #include "assets.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -36,6 +37,17 @@ int run_app(const char *target_file_path, Config* config) {
         log_error("SDL_CreateRenderer Error: %s", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
+        return 1;
+    }
+
+    if (TTF_Init() == -1) {
+        log_error("TTF_Init error: %s\n", TTF_GetError());
+        return 1;
+    }
+
+    TTF_Font *font = TTF_OpenFont("assets/OpenSans.ttf", 16);
+    if (!font) {
+        log_error("Font load error: %s\n", TTF_GetError());
         return 1;
     }
 
@@ -162,9 +174,11 @@ int run_app(const char *target_file_path, Config* config) {
                     } else if (event.key.keysym.sym == SDLK_i && (event.key.keysym.mod & KMOD_CTRL)) {
                         if (context.current_tool.size < 50)
                             ++context.current_tool.size;
+                        needs_redraw = true;
                     } else if (event.key.keysym.sym == SDLK_o && (event.key.keysym.mod & KMOD_CTRL)) {
                         if (context.current_tool.size > 1)
                             --context.current_tool.size;
+                        needs_redraw = true;
                     } else if (event.key.keysym.sym >= SDLK_1 && event.key.keysym.sym < SDLK_1 + TOOL_COUNT) {
                         ToolType tool_type = event.key.keysym.sym - SDLK_1;
                         set_tool_type(&context.current_tool, tool_type);
@@ -179,7 +193,7 @@ int run_app(const char *target_file_path, Config* config) {
         }
 
         if (needs_redraw) {
-            draw_topbar(renderer, &context, config);
+            draw_topbar(renderer, &context, config, font);
             draw_left_sidebar(renderer, &context, config);
             SDL_RenderPresent(renderer);
             needs_redraw = false;
@@ -190,6 +204,8 @@ int run_app(const char *target_file_path, Config* config) {
 
     free_paint_context(&context);
     free_assets(global_assets);
+    TTF_CloseFont(font);
+    TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

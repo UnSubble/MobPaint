@@ -3,7 +3,7 @@
 # MobPaint Multi-Distro Dependency Installer
 # Usage: chmod +x install.sh && ./install.sh
 
-DEPENDENCIES=("sdl2" "sdl2_gfx" "sdl2_image" "cjson")
+DEPENDENCIES=("sdl2" "sdl2_gfx" "sdl2_image" "sdl2_ttf" "cjson")
 
 echo "[MobPaint] Detecting Linux distribution..."
 

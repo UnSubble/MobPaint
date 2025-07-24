@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "tools/tools.h"
 #include "context/paint_context.h"
 #include "context/config.h"
@@ -57,7 +58,7 @@ void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y);
 /**
  * Draws the top bar within the sidebar module.
  */
-void draw_topbar(SDL_Renderer *renderer, PaintContext *context, Config *config);
+void draw_topbar(SDL_Renderer *renderer, PaintContext *context, Config *config, TTF_Font *font);
 
 /**
  * Handles click events within the top bar area.
