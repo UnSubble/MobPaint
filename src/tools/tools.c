@@ -87,25 +87,38 @@ void draw_thick_circle(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, i
     const float dx = x2 - x1;
     const float dy = y2 - y1;
     const float distance = SDL_sqrtf(dx * dx + dy * dy);
-
-    if (distance == 0) 
+    
+    if (distance == 0)
         return;
-
+    
     const float cx = (x2 + x1) / 2.0f;
     const float cy = (y2 + y1) / 2.0f;
     const float radius = distance / 2.0f;
     
-    const int segments = (int)SDL_powf(2, M_PI * SDL_logf(radius));
-    const float step = 2.0f * (float)M_PI / segments;
-
+    const int segments = (int)(2.0f * M_PI * M_PI * radius);
+    const float step = 2.0f * M_PI / segments;
+    
+    float *cos_table = malloc(segments * sizeof(float));
+    float *sin_table = malloc(segments * sizeof(float));
+    
+    for (int i = 0; i < segments; i++) {
+        float theta = i * step;
+        cos_table[i] = SDL_cosf(theta);
+        sin_table[i] = SDL_sinf(theta);
+    }
+    
     for (int r = 0; r < size; r++) {
-        float current_radius = radius - size / 2 + r;
-        for (float theta = 0.0f; theta < 2.0f * (float)M_PI; theta += step) {
-            int x = (int)(cx + current_radius * SDL_cosf(theta));
-            int y = (int)(cy + current_radius * SDL_sinf(theta));
+        float current_radius = radius - size / 2.0f + r;
+        
+        for (int i = 0; i < segments; i++) {
+            int x = (int)(cx + current_radius * cos_table[i]);
+            int y = (int)(cy + current_radius * sin_table[i]);
             SDL_RenderDrawPoint(renderer, x, y);
         }
     }
+    
+    free(cos_table);
+    free(sin_table);
 }
 
 bool colors_equal(SDL_Color *a, SDL_Color *b) {
