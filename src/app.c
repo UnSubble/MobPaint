@@ -87,6 +87,8 @@ int run_app(const char *target_file_path, Config* config) {
                             if (event.button.y < TOPBAR_HEIGHT)
                                 handle_topbar_click(&context, event.button.x, event.button.y);
                         } else {
+                            context.text_placed = false;
+                            
                             drawing = true;
                             context.mouse_x = event.button.x;
                             context.mouse_y = event.button.y;
@@ -118,7 +120,7 @@ int run_app(const char *target_file_path, Config* config) {
                             context.mouse_y = event.button.y;
 
                             use_tool(&context, prev_x, prev_y);
-                        } else if (context.current_tool.type != TOOL_FILL) {
+                        } else if (context.current_tool.type != TOOL_FILL && context.current_tool.type != TOOL_TEXT) {
                             prev_x = context.mouse_x;
                             prev_y = context.mouse_y;
                             context.mouse_x = event.button.x;
@@ -128,7 +130,11 @@ int run_app(const char *target_file_path, Config* config) {
 
                         context.mouse_x = -1;
                         context.mouse_y = -1;
-                        end_stroke(&context);
+                        
+                        if (context.current_tool.type != TOOL_TEXT || !context.text_input_active) {
+                            end_stroke(&context);
+                        }
+                        
                         needs_redraw = true;
                         log_info("Drawing stopped.");
                     }
@@ -142,7 +148,7 @@ int run_app(const char *target_file_path, Config* config) {
                         context.mouse_y = event.motion.y;
 
                         if (context.current_tool.type != TOOL_LINE && context.current_tool.type != TOOL_CIRCLE 
-                                    && context.current_tool.type != TOOL_FILL) {
+                                    && context.current_tool.type != TOOL_FILL && context.current_tool.type != TOOL_TEXT) {
                             use_tool(&context, prev_x, prev_y);
                             needs_redraw = true;
                         }
@@ -150,39 +156,56 @@ int run_app(const char *target_file_path, Config* config) {
                     break;
 
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE) {
-                        log_info("ESC pressed. Exiting.");
-                        running = false;
-                    } else if (event.key.keysym.sym == SDLK_c && (event.key.keysym.mod & KMOD_CTRL)) {
-                        SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g,
-                                                          background_color.b, background_color.a);
-                        SDL_RenderClear(renderer);
-                        SDL_RenderCopy(renderer, context.bitmap_cache, NULL, NULL);
-                        needs_redraw = true;
-                        log_info("Canvas cleared.");
-                    } else if (event.key.keysym.sym == SDLK_z && (event.key.keysym.mod & KMOD_CTRL)) {
-                        bool changed = false;
-                        if (event.key.keysym.mod & KMOD_SHIFT) {
-                            changed = paint_context_redo(&context);
+                    if (context.text_input_active) {
+                        if (!handle_text_key(&context, event.key.keysym.sym)) {
+                            finalize_text_input(&context, font);
+                            end_stroke(&context);
+                            needs_redraw = true;
                         } else {
-                            changed = paint_context_undo(&context);
-                        }
-                        if (changed) {
-                            redraw_canvas(&context);
                             needs_redraw = true;
                         }
-                    } else if (event.key.keysym.sym == SDLK_i && (event.key.keysym.mod & KMOD_CTRL)) {
-                        if (context.current_tool.size < 50)
-                            ++context.current_tool.size;
-                        needs_redraw = true;
-                    } else if (event.key.keysym.sym == SDLK_o && (event.key.keysym.mod & KMOD_CTRL)) {
-                        if (context.current_tool.size > 1)
-                            --context.current_tool.size;
-                        needs_redraw = true;
-                    } else if (event.key.keysym.sym >= SDLK_1 && event.key.keysym.sym < SDLK_1 + TOOL_COUNT) {
-                        ToolType tool_type = event.key.keysym.sym - SDLK_1;
-                        set_tool_type(&context.current_tool, tool_type);
-                        log_info("Tool switched to %s.", get_tool_name(&context.current_tool));
+                    } else {
+                        if (event.key.keysym.sym == SDLK_ESCAPE) {
+                            log_info("ESC pressed. Exiting.");
+                            running = false;
+                        } else if (event.key.keysym.sym == SDLK_c && (event.key.keysym.mod & KMOD_CTRL)) {
+                            SDL_SetRenderDrawColor(renderer, background_color.r, background_color.g,
+                                                              background_color.b, background_color.a);
+                            SDL_RenderClear(renderer);
+                            SDL_RenderCopy(renderer, context.bitmap_cache, NULL, NULL);
+                            needs_redraw = true;
+                            log_info("Canvas cleared.");
+                        } else if (event.key.keysym.sym == SDLK_z && (event.key.keysym.mod & KMOD_CTRL)) {
+                            bool changed = false;
+                            if (event.key.keysym.mod & KMOD_SHIFT) {
+                                changed = paint_context_redo(&context);
+                            } else {
+                                changed = paint_context_undo(&context);
+                            }
+                            if (changed) {
+                                redraw_canvas(&context);
+                                needs_redraw = true;
+                            }
+                        } else if (event.key.keysym.sym == SDLK_i && (event.key.keysym.mod & KMOD_CTRL)) {
+                            if (context.current_tool.size < 50)
+                                ++context.current_tool.size;
+                            needs_redraw = true;
+                        } else if (event.key.keysym.sym == SDLK_o && (event.key.keysym.mod & KMOD_CTRL)) {
+                            if (context.current_tool.size > 1)
+                                --context.current_tool.size;
+                            needs_redraw = true;
+                        } else if (event.key.keysym.sym >= SDLK_1 && event.key.keysym.sym < SDLK_1 + TOOL_COUNT) {
+                            ToolType tool_type = event.key.keysym.sym - SDLK_1;
+                            set_tool_type(&context.current_tool, tool_type);
+                            log_info("Tool switched to %s.", get_tool_name(&context.current_tool));
+                            needs_redraw = true;
+                        }
+                    }
+                    break;
+
+                case SDL_TEXTINPUT:
+                    if (context.text_input_active) {
+                        handle_text_input(&context, event.text.text);
                         needs_redraw = true;
                     }
                     break;
@@ -195,6 +218,30 @@ int run_app(const char *target_file_path, Config* config) {
         if (needs_redraw) {
             draw_topbar(renderer, &context, config, font);
             draw_left_sidebar(renderer, &context, config);
+            
+            if (context.text_input_active && strlen(context.text_input_buffer) > 0) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+                
+                int text_w, text_h;
+                TTF_SizeText(font, context.text_input_buffer, &text_w, &text_h);
+                
+                SDL_Rect bg_rect = {
+                    context.text_input_x - 2,
+                    context.text_input_y - 2,
+                    text_w + 4,
+                    text_h + 4
+                };
+                SDL_RenderFillRect(renderer, &bg_rect);
+                
+                render_text(renderer, font, context.text_input_buffer, 
+                           context.text_input_x, context.text_input_y, context.current_tool.color);
+                           
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderDrawLine(renderer, 
+                                  context.text_input_x + text_w, context.text_input_y,
+                                  context.text_input_x + text_w, context.text_input_y + text_h);
+            }
+            
             SDL_RenderPresent(renderer);
             needs_redraw = false;
         }

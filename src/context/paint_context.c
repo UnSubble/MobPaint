@@ -1,6 +1,7 @@
 #include "context/paint_context.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry);
 
@@ -10,6 +11,7 @@ static HistoryEntry* create_empty_entry(Tool tool) {
     entry->points = NULL;
     entry->count = 0;
     entry->capacity = 0;
+    entry->text_data = NULL;
     
     entry->tool.type = tool.type;
     entry->tool.size = tool.size;
@@ -26,6 +28,12 @@ void init_paint_context(SDL_Renderer *renderer, PaintContext *paint_context, Con
     paint_context->mouse_x = -1;
     paint_context->mouse_y = -1;
     paint_context->committed_stroke_count = 0;
+
+    paint_context->text_input_active = false;
+    paint_context->text_input_buffer[0] = '\0';
+    paint_context->text_input_x = 0;
+    paint_context->text_input_y = 0;
+    paint_context->text_placed = false;
 
     paint_context->undo_stack = malloc(sizeof(History));
     paint_context->redo_stack = malloc(sizeof(History));
@@ -89,6 +97,7 @@ void end_stroke(PaintContext *paint_context) {
     }
 
     free(paint_context->current_stroke->points);
+    free(paint_context->current_stroke->text_data);
     free(paint_context->current_stroke);
     paint_context->current_stroke = NULL;
 }
@@ -156,6 +165,19 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
         }
         break;
     }
+    case TOOL_TEXT: {
+        if (entry->count > 0 && entry->text_data) {
+            Point *pos = &entry->points[0];
+            
+            TTF_Font *font = TTF_OpenFont("assets/OpenSans.ttf", entry->tool.size + 12);
+            if (font) {
+                extern void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y, SDL_Color color);
+                render_text(renderer, font, entry->text_data, pos->x, pos->y, entry->tool.color);
+                TTF_CloseFont(font);
+            }
+        }
+        break;
+    }
     default:
         break;
     }
@@ -166,10 +188,15 @@ void redraw_canvas(PaintContext *paint_context) {
         return;
 
     SDL_SetRenderTarget(paint_context->renderer, NULL);
+    
     SDL_SetRenderDrawColor(paint_context->renderer, 255, 255, 255, 255);
     SDL_RenderClear(paint_context->renderer);
 
-    for (int i = 0; i < paint_context->undo_stack->count; i++) {
+    if (paint_context->bitmap_cache && paint_context->committed_stroke_count > 0) {
+        SDL_RenderCopy(paint_context->renderer, paint_context->bitmap_cache, NULL, NULL);
+    }
+
+    for (int i = paint_context->committed_stroke_count; i < paint_context->undo_stack->count; i++) {
         apply_history_entry(paint_context->renderer, &paint_context->undo_stack->entries[i]);
     }
 }
@@ -180,6 +207,8 @@ static bool exchange_history(PaintContext *ctx, History *from, History *to) {
     HistoryEntry entry = pop_history(from);
     push_history(to, entry);
 
+    ctx->committed_stroke_count = 0;
+    
     redraw_canvas(ctx);
     return true;
 }
@@ -212,4 +241,93 @@ void free_paint_context(PaintContext *ctx) {
         SDL_DestroyTexture(ctx->bitmap_cache);
         ctx->bitmap_cache = NULL;
     }
+}
+
+void start_text_input(PaintContext *paint_context, int x, int y) {
+    if (!paint_context) return;
+    
+    paint_context->text_input_active = true;
+    paint_context->text_input_buffer[0] = '\0';
+    paint_context->text_input_x = x;
+    paint_context->text_input_y = y;
+    paint_context->text_placed = false;
+
+    SDL_StartTextInput();
+}
+
+bool handle_text_input(PaintContext *paint_context, const char *text) {
+    if (!paint_context || !paint_context->text_input_active || !text) {
+        return false;
+    }
+    
+    size_t current_len = strlen(paint_context->text_input_buffer);
+    size_t text_len = strlen(text);
+    
+    if (current_len + text_len < sizeof(paint_context->text_input_buffer) - 1) {
+        strcat(paint_context->text_input_buffer, text);
+    }
+    
+    return true;
+}
+
+bool handle_text_key(PaintContext *paint_context, SDL_Keycode key) {
+    if (!paint_context || !paint_context->text_input_active) {
+        return false;
+    }
+    
+    switch (key) {
+        case SDLK_BACKSPACE: {
+            int len = strlen(paint_context->text_input_buffer);
+            if (len > 0) {
+                paint_context->text_input_buffer[len - 1] = '\0';
+            }
+            break;
+        }
+        case SDLK_RETURN:
+        case SDLK_KP_ENTER: {
+            return false;
+        }
+        case SDLK_ESCAPE: {
+            cancel_text_input(paint_context);
+            return false;
+        }
+        default:
+            break;
+    }
+    
+    return true;
+}
+
+void finalize_text_input(PaintContext *paint_context, TTF_Font *font) {
+    if (!paint_context || !paint_context->text_input_active || !font) {
+        return;
+    }
+    
+    if (strlen(paint_context->text_input_buffer) > 0) {
+        extern void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y, SDL_Color color);
+        render_text(paint_context->renderer, font, paint_context->text_input_buffer, 
+                   paint_context->text_input_x, paint_context->text_input_y, paint_context->current_tool.color);
+        
+        add_point_to_current_stroke(paint_context, paint_context->text_input_x, paint_context->text_input_y);
+        
+        if (paint_context->current_stroke) {
+            paint_context->current_stroke->text_data = malloc(strlen(paint_context->text_input_buffer) + 1);
+            if (paint_context->current_stroke->text_data) {
+                strcpy(paint_context->current_stroke->text_data, paint_context->text_input_buffer);
+            }
+        }
+        
+        paint_context->text_placed = true;
+    }
+    
+    paint_context->text_input_active = false;
+    SDL_StopTextInput();
+}
+
+void cancel_text_input(PaintContext *paint_context) {
+    if (!paint_context) return;
+    
+    paint_context->text_input_active = false;
+    paint_context->text_input_buffer[0] = '\0';
+    SDL_StopTextInput();
 }

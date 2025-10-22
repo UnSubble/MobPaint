@@ -1,6 +1,7 @@
 #include "tools/tools.h"
 #include "context/paint_context.h"
 #include "context/logs.h"
+#include <SDL2/SDL_ttf.h>
 #include <string.h>
 
 #define _USE_MATH_DEFINES
@@ -22,6 +23,8 @@ ToolType get_tooltype_from_string(const char *tool_name) {
         return TOOL_CIRCLE;
     } else if (strcasecmp(tool_name, "FILL") == 0) {
         return TOOL_FILL;
+    } else if (strcasecmp(tool_name, "TEXT") == 0) {
+        return TOOL_TEXT;
     } else {
         return -1;
     }
@@ -47,6 +50,7 @@ void set_tool_type(Tool *tool, ToolType type) {
     case TOOL_CIRCLE:
     case TOOL_LINE:
     case TOOL_BRUSH:
+    case TOOL_TEXT:
         tool->color = (SDL_Color){0, 0, 0, 255};  // Black
         break;
     case TOOL_ERASER:
@@ -272,6 +276,37 @@ static SDL_Color get_pixel_with_renderer(SDL_Renderer *renderer, int x, int y) {
     return target_color; 
 }
 
+void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y, SDL_Color color) {
+    if (!font || !text || strlen(text) == 0) {
+        return;
+    }
+    
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, text, color);
+    if (!text_surface) {
+        log_error("Failed to create text surface: %s", TTF_GetError());
+        return;
+    }
+    
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    if (!text_texture) {
+        log_error("Failed to create text texture: %s", SDL_GetError());
+        SDL_FreeSurface(text_surface);
+        return;
+    }
+    
+    SDL_Rect text_rect = {
+        x,
+        y,
+        text_surface->w,
+        text_surface->h
+    };
+    
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(text_surface);
+}
+
 void use_tool(PaintContext* context, int prev_x, int prev_y) {
     Tool *tool = &context->current_tool; 
     SDL_SetRenderDrawColor(context->renderer, tool->color.r, tool->color.g, tool->color.b, tool->color.a);
@@ -324,6 +359,12 @@ void use_tool(PaintContext* context, int prev_x, int prev_y) {
         }
         break;
     }
+    case TOOL_TEXT: {
+        if (!context->text_input_active && !context->text_placed) {
+            start_text_input(context, context->mouse_x, context->mouse_y);
+        }
+        break;
+    }
     default:
         break;
     }
@@ -341,6 +382,8 @@ const char* get_tool_name(const Tool* tool) {
         return "CIRCLE";
     case TOOL_FILL:
         return "FILL";
+    case TOOL_TEXT:
+        return "TEXT";
     default:
         return "UNKNOWN";
     }

@@ -16,6 +16,7 @@ void free_history(History *history) {
         return;
     for (int i = 0; i < history->count; i++) {
         free(history->entries[i].points);
+        free(history->entries[i].text_data);
     }
     free(history->entries);
     history->entries = NULL;
@@ -56,6 +57,15 @@ void push_history(History *history, HistoryEntry entry) {
         memcpy(target->points, entry.points, entry.count * sizeof(Point));
     } else {
         target->points = NULL;
+    }
+
+    if (entry.text_data) {
+        target->text_data = malloc(strlen(entry.text_data) + 1);
+        if (target->text_data) {
+            strcpy(target->text_data, entry.text_data);
+        }
+    } else {
+        target->text_data = NULL;
     }
 
     history->count++;

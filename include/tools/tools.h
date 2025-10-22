@@ -2,6 +2,7 @@
 #define TOOLS_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "context/config.h"
 
 typedef struct PaintContext PaintContext;
@@ -15,7 +16,8 @@ typedef enum {
     TOOL_LINE = 2,
     TOOL_CIRCLE = 3,
     TOOL_FILL = 4,
-    TOOL_COUNT = 5, // Always at the bottom
+    TOOL_TEXT = 5,
+    TOOL_COUNT = 6, // Always at the bottom
     // TOOL_RECT,
     // TOOL_COUNT
 } ToolType;
@@ -99,5 +101,17 @@ int flood_fill(SDL_Renderer *renderer, int start_x, int start_y,
  * @return     Static string describing the tool (e.g., "Brush").
  */
 const char* get_tool_name(const Tool *tool);
+
+/**
+ * Renders text at the specified position using the given font and color.
+ *
+ * @param renderer SDL renderer to use for drawing.
+ * @param font     TTF font to use for text rendering.
+ * @param text     Text string to render.
+ * @param x        X position to render the text.
+ * @param y        Y position to render the text.
+ * @param color    Color to use for the text.
+ */
+void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y, SDL_Color color);
 
 #endif // TOOLS_H

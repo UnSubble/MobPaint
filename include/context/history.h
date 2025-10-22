@@ -17,6 +17,7 @@ typedef struct {
     int count;          // Number of points currently stored
     int capacity;       // Allocated capacity of points array
     Tool tool;          // Tool used for this entry
+    char *text_data;    // Text content for TOOL_TEXT (NULL for other tools)
 } HistoryEntry;
 
 // Represents the history of drawing actions

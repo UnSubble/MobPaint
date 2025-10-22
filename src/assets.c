@@ -20,10 +20,11 @@ Assets *load_assets(SDL_Renderer *renderer) {
         "assets/eraser.png",
         "assets/line.png",
         "assets/circle.png",
-        "assets/fill.png"
+        "assets/fill.png",
+        "assets/text.png"
     };
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         assets->tool_icons[i] = load_texture(renderer, tool_paths[i]);
     }
 
@@ -36,7 +37,7 @@ Assets *load_assets(SDL_Renderer *renderer) {
 }
 
 void free_assets(Assets *assets) {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         if (assets->tool_icons[i]) SDL_DestroyTexture(assets->tool_icons[i]);
     }
 
