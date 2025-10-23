@@ -126,17 +126,7 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
         entry->tool.color.a);
 
     Point *last = &entry->points[0];
-    
-    if (last->x >= 0 && last->y >= 0) {
-        SDL_Rect rect = {
-            .w = entry->tool.size,
-            .h = entry->tool.size,
-            .x = last->x - rect.w / 2,
-            .y = last->y - rect.h / 2,
-        };
-        SDL_RenderFillRect(renderer, &rect);
-    }
-
+        
     switch (entry->tool.type)
     {
     case TOOL_BRUSH:
@@ -155,7 +145,7 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
             draw_thick_circle(renderer, last->x, last->y, curr->x, curr->y, entry->tool.size);
             last = curr;
         }
-        break;
+        return;
     }
     case TOOL_FILL: {
         for (int i = 1; i < entry->count; i++) {
@@ -176,10 +166,20 @@ void apply_history_entry(SDL_Renderer *renderer, const HistoryEntry *entry) {
                 TTF_CloseFont(font);
             }
         }
-        break;
+        return;
     }
     default:
         break;
+    }
+
+    if (last->x >= 0 && last->y >= 0) {
+        SDL_Rect rect = {
+            .w = entry->tool.size,
+            .h = entry->tool.size,
+            .x = last->x - rect.w / 2,
+            .y = last->y - rect.h / 2,
+        };
+        SDL_RenderFillRect(renderer, &rect);
     }
 }
 
@@ -298,15 +298,24 @@ bool handle_text_key(PaintContext *paint_context, SDL_Keycode key) {
     return true;
 }
 
-void finalize_text_input(PaintContext *paint_context, TTF_Font *font) {
-    if (!paint_context || !paint_context->text_input_active || !font) {
+void finalize_text_input(PaintContext *paint_context) {
+    if (!paint_context || !paint_context->text_input_active) {
         return;
     }
     
     if (strlen(paint_context->text_input_buffer) > 0) {
+        TTF_Font *text_font = TTF_OpenFont("assets/OpenSans.ttf", paint_context->current_tool.size + 12);
+        if (!text_font) {
+            paint_context->text_input_active = false;
+            SDL_StopTextInput();
+            return;
+        }
+        
         extern void render_text(SDL_Renderer *renderer, TTF_Font *font, const char *text, int x, int y, SDL_Color color);
-        render_text(paint_context->renderer, font, paint_context->text_input_buffer, 
+        render_text(paint_context->renderer, text_font, paint_context->text_input_buffer, 
                    paint_context->text_input_x, paint_context->text_input_y, paint_context->current_tool.color);
+        
+        TTF_CloseFont(text_font);
         
         add_point_to_current_stroke(paint_context, paint_context->text_input_x, paint_context->text_input_y);
         

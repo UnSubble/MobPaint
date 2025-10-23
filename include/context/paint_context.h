@@ -140,9 +140,8 @@ bool handle_text_key(PaintContext *paint_context, SDL_Keycode key);
  * Finalizes text input and renders the text to the canvas.
  *
  * @param paint_context Pointer to PaintContext.
- * @param font          Font to use for rendering.
  */
-void finalize_text_input(PaintContext *paint_context, TTF_Font *font);
+void finalize_text_input(PaintContext *paint_context);
 
 /**
  * Cancels text input without rendering.

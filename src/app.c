@@ -158,12 +158,11 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_KEYDOWN:
                     if (context.text_input_active) {
                         if (!handle_text_key(&context, event.key.keysym.sym)) {
-                            finalize_text_input(&context, font);
+                            finalize_text_input(&context);
                             end_stroke(&context);
-                            needs_redraw = true;
-                        } else {
-                            needs_redraw = true;
-                        }
+                            redraw_canvas(&context);
+                        } 
+                        needs_redraw = true;
                     } else {
                         if (event.key.keysym.sym == SDLK_ESCAPE) {
                             log_info("ESC pressed. Exiting.");
@@ -216,30 +215,50 @@ int run_app(const char *target_file_path, Config* config) {
         }
 
         if (needs_redraw) {
+            if (context.text_input_active) {
+                redraw_canvas(&context);
+            }
+            
             draw_topbar(renderer, &context, config, font);
             draw_left_sidebar(renderer, &context, config);
             
-            if (context.text_input_active && strlen(context.text_input_buffer) > 0) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+            if (context.text_input_active) {
+                TTF_Font *preview_font = TTF_OpenFont("assets/OpenSans.ttf", context.current_tool.size + 12);
+                if (preview_font && strlen(context.text_input_buffer) > 0) {
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+                    
+                    int text_w, text_h;
+                    TTF_SizeText(preview_font, context.text_input_buffer, &text_w, &text_h);
+                    
+                    SDL_Rect bg_rect = {
+                        context.text_input_x - 2,
+                        context.text_input_y - 2,
+                        text_w + 4,
+                        text_h + 4
+                    };
+                    SDL_RenderFillRect(renderer, &bg_rect);
+                    
+                    render_text(renderer, preview_font, context.text_input_buffer, 
+                               context.text_input_x, context.text_input_y, context.current_tool.color);
+                }
                 
-                int text_w, text_h;
-                TTF_SizeText(font, context.text_input_buffer, &text_w, &text_h);
-                
-                SDL_Rect bg_rect = {
-                    context.text_input_x - 2,
-                    context.text_input_y - 2,
-                    text_w + 4,
-                    text_h + 4
-                };
-                SDL_RenderFillRect(renderer, &bg_rect);
-                
-                render_text(renderer, font, context.text_input_buffer, 
-                           context.text_input_x, context.text_input_y, context.current_tool.color);
-                           
+                int text_w = 0;
+                if (preview_font && strlen(context.text_input_buffer) > 0) {
+                    TTF_SizeText(preview_font, context.text_input_buffer, &text_w, NULL);
+                }
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                int cursor_height;
+                if (preview_font) {
+                    TTF_SizeText(preview_font, "I", NULL, &cursor_height);
+                } else {
+                    cursor_height = 16;
+                }
+                if (preview_font) {
+                    TTF_CloseFont(preview_font);
+                }
                 SDL_RenderDrawLine(renderer, 
                                   context.text_input_x + text_w, context.text_input_y,
-                                  context.text_input_x + text_w, context.text_input_y + text_h);
+                                  context.text_input_x + text_w, context.text_input_y + cursor_height);
             }
             
             SDL_RenderPresent(renderer);
