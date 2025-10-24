@@ -82,8 +82,10 @@ int run_app(const char *target_file_path, Config* config) {
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         if (in_sidebar_bounds(event.button.x, event.button.y)) {
-                            if (event.button.x < SIDEBAR_WIDTH)
+                            if (event.button.x < SIDEBAR_WIDTH) {
                                 handle_sidebar_click(&context, event.button.x, event.button.y);
+                                handle_color_palette_click(&context, event.button.x, event.button.y);
+                            }
                             if (event.button.y < TOPBAR_HEIGHT)
                                 handle_topbar_click(&context, event.button.x, event.button.y);
                         } else {

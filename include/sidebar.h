@@ -15,7 +15,7 @@
 
 // Tool button layout in sidebar
 #define TOOL_BTN_X            10
-#define TOOL_BTN_Y_START      10
+#define TOOL_BTN_Y_START      0
 #define TOOL_BTN_WIDTH        60
 #define TOOL_BTN_HEIGHT       60
 #define TOOL_BTN_SPACING      10
@@ -24,6 +24,12 @@
 #define TOPBAR_BTN_WIDTH      30
 #define TOPBAR_BTN_HEIGHT     30
 #define TOPBAR_BTN_SPACING    10
+
+// Color palette layout
+#define COLOR_PALETTE_Y_START 480 
+#define COLOR_PALETTE_SIZE    18
+#define COLOR_PALETTE_COLS    3
+#define COLOR_PALETTE_SPACING 3
 
 extern Assets *global_assets;
 
@@ -64,5 +70,15 @@ void draw_topbar(SDL_Renderer *renderer, PaintContext *context, Config *config, 
  * Handles click events within the top bar area.
  */
 void handle_topbar_click(PaintContext *context, int mouse_x, int mouse_y);
+
+/**
+ * Draws the color palette in the sidebar.
+ */
+void draw_color_palette(SDL_Renderer *renderer, PaintContext *context, Config *config);
+
+/**
+ * Handles click events within the color palette area.
+ */
+void handle_color_palette_click(PaintContext *context, int mouse_x, int mouse_y);
 
 #endif // SIDEBAR_H

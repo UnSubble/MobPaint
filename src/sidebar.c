@@ -137,6 +137,9 @@ void draw_left_sidebar(SDL_Renderer *renderer, PaintContext *context, Config *co
         SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
         SDL_RenderDrawRect(renderer, &selected);
     }
+    
+    // Draw color palette
+    draw_color_palette(renderer, context, config);
 }
 
 void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y) {
@@ -154,4 +157,91 @@ void handle_sidebar_click(PaintContext *context, int mouse_x, int mouse_y) {
 
 bool in_sidebar_bounds(int x, int y) {
     return x < SIDEBAR_WIDTH || y < TOPBAR_HEIGHT;
+}
+
+static SDL_Color palette_colors[] = {
+    {0, 0, 0, 255},       // Black
+    {255, 255, 255, 255}, // White
+    {255, 0, 0, 255},     // Red
+    {0, 255, 0, 255},     // Green
+    {0, 0, 255, 255},     // Blue
+    {255, 255, 0, 255},   // Yellow
+    {255, 165, 0, 255},   // Orange
+    {128, 0, 128, 255},   // Purple
+    {255, 192, 203, 255}, // Pink
+    {165, 42, 42, 255},   // Brown
+    {128, 128, 128, 255}, // Gray
+    {0, 255, 255, 255},   // Cyan
+};
+
+static const int PALETTE_COLOR_COUNT = sizeof(palette_colors) / sizeof(palette_colors[0]);
+
+void draw_color_palette(SDL_Renderer *renderer, PaintContext *context, Config *config) {
+    (void)config;
+    int x_start = TOOL_BTN_X;
+    int y = COLOR_PALETTE_Y_START;
+    
+    for (int i = 0; i < PALETTE_COLOR_COUNT; i++) {
+        int col = i % COLOR_PALETTE_COLS;
+        int row = i / COLOR_PALETTE_COLS;
+        
+        int x = x_start + col * (COLOR_PALETTE_SIZE + COLOR_PALETTE_SPACING);
+        int y_pos = y + row * (COLOR_PALETTE_SIZE + COLOR_PALETTE_SPACING);
+        
+        SDL_Rect color_box = {
+            .x = x,
+            .y = y_pos,
+            .w = COLOR_PALETTE_SIZE,
+            .h = COLOR_PALETTE_SIZE
+        };
+        
+        SDL_SetRenderDrawColor(renderer, 
+            palette_colors[i].r, 
+            palette_colors[i].g, 
+            palette_colors[i].b, 
+            palette_colors[i].a);
+        SDL_RenderFillRect(renderer, &color_box);
+        
+        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_RenderDrawRect(renderer, &color_box);
+        
+        if (context->current_tool.type != TOOL_ERASER &&
+            context->current_tool.color.r == palette_colors[i].r &&
+            context->current_tool.color.g == palette_colors[i].g &&
+            context->current_tool.color.b == palette_colors[i].b) {
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            for (int offset = 0; offset < 3; offset++) {
+                SDL_Rect highlight = {
+                    .x = color_box.x - offset,
+                    .y = color_box.y - offset,
+                    .w = color_box.w + offset * 2,
+                    .h = color_box.h + offset * 2
+                };
+                SDL_RenderDrawRect(renderer, &highlight);
+            }
+        }
+    }
+}
+
+void handle_color_palette_click(PaintContext *context, int mouse_x, int mouse_y) {
+    if (mouse_x > SIDEBAR_WIDTH) return;
+    if (mouse_y < COLOR_PALETTE_Y_START) return;
+    
+    int x_start = TOOL_BTN_X;
+    
+    for (int i = 0; i < PALETTE_COLOR_COUNT; i++) {
+        int col = i % COLOR_PALETTE_COLS;
+        int row = i / COLOR_PALETTE_COLS;
+        
+        int x = x_start + col * (COLOR_PALETTE_SIZE + COLOR_PALETTE_SPACING);
+        int y_pos = COLOR_PALETTE_Y_START + row * (COLOR_PALETTE_SIZE + COLOR_PALETTE_SPACING);
+        
+        if (mouse_x >= x && mouse_x <= x + COLOR_PALETTE_SIZE &&
+            mouse_y >= y_pos && mouse_y <= y_pos + COLOR_PALETTE_SIZE) {
+            if (context->current_tool.type != TOOL_ERASER) {
+                context->current_tool.color = palette_colors[i];
+            }
+            return;
+        }
+    }
 }
