@@ -14,6 +14,26 @@ static void set_default_config(Config *config) {
     config->brush_color.g = 0;
     config->brush_color.b = 0;
     config->brush_color.a = 255;
+    
+    // Default color palette
+    config->palette_count = 12;
+    SDL_Color default_palette[] = {
+        {0, 0, 0, 255},       // Black
+        {255, 255, 255, 255}, // White
+        {255, 0, 0, 255},     // Red
+        {0, 255, 0, 255},     // Green
+        {0, 0, 255, 255},     // Blue
+        {255, 255, 0, 255},   // Yellow
+        {255, 165, 0, 255},   // Orange
+        {128, 0, 128, 255},   // Purple
+        {255, 192, 203, 255}, // Pink
+        {165, 42, 42, 255},   // Brown
+        {128, 128, 128, 255}, // Gray
+        {0, 255, 255, 255},   // Cyan
+    };
+    for (int i = 0; i < config->palette_count; i++) {
+        config->palette_colors[i] = default_palette[i];
+    }
 }
 
 bool load_config(const char *filename, Config *config) {
@@ -105,6 +125,30 @@ bool load_config(const char *filename, Config *config) {
                 config->brush_color.g = (Uint8)g->valueint;
                 config->brush_color.b = (Uint8)b->valueint;
                 config->brush_color.a = (Uint8)a->valueint;
+            }
+        }
+    }
+
+    // Load color palette
+    cJSON *color_palette = cJSON_GetObjectItemCaseSensitive(json, "color_palette");
+    if (cJSON_IsArray(color_palette)) {
+        int palette_size = cJSON_GetArraySize(color_palette);
+        config->palette_count = palette_size < MAX_PALETTE_COLORS ? palette_size : MAX_PALETTE_COLORS;
+        
+        for (int i = 0; i < config->palette_count; i++) {
+            cJSON *color = cJSON_GetArrayItem(color_palette, i);
+            if (cJSON_IsArray(color) && cJSON_GetArraySize(color) == 4) {
+                cJSON *r = cJSON_GetArrayItem(color, 0);
+                cJSON *g = cJSON_GetArrayItem(color, 1);
+                cJSON *b = cJSON_GetArrayItem(color, 2);
+                cJSON *a = cJSON_GetArrayItem(color, 3);
+                
+                if (cJSON_IsNumber(r) && cJSON_IsNumber(g) && cJSON_IsNumber(b) && cJSON_IsNumber(a)) {
+                    config->palette_colors[i].r = (Uint8)r->valueint;
+                    config->palette_colors[i].g = (Uint8)g->valueint;
+                    config->palette_colors[i].b = (Uint8)b->valueint;
+                    config->palette_colors[i].a = (Uint8)a->valueint;
+                }
             }
         }
     }

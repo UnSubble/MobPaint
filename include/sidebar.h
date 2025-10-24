@@ -79,6 +79,6 @@ void draw_color_palette(SDL_Renderer *renderer, PaintContext *context, Config *c
 /**
  * Handles click events within the color palette area.
  */
-void handle_color_palette_click(PaintContext *context, int mouse_x, int mouse_y);
+void handle_color_palette_click(PaintContext *context, Config *config, int mouse_x, int mouse_y);
 
 #endif // SIDEBAR_H

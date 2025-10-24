@@ -8,6 +8,7 @@
 #define LOG_DIR_MAX_LEN            256
 #define TARGET_PATH_MAX_LEN        512
 #define TOOL_NAME_MAX_LEN           32
+#define MAX_PALETTE_COLORS          32
 
 // Configuration structure for MobPaint
 typedef struct {
@@ -26,6 +27,10 @@ typedef struct {
 
     // Background settings
     SDL_Color default_background_color;
+    
+    // Color palette
+    SDL_Color palette_colors[MAX_PALETTE_COLORS];
+    int palette_count;
 } Config;
 
 /**

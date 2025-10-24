@@ -84,7 +84,7 @@ int run_app(const char *target_file_path, Config* config) {
                         if (in_sidebar_bounds(event.button.x, event.button.y)) {
                             if (event.button.x < SIDEBAR_WIDTH) {
                                 handle_sidebar_click(&context, event.button.x, event.button.y);
-                                handle_color_palette_click(&context, event.button.x, event.button.y);
+                                handle_color_palette_click(&context, config, event.button.x, event.button.y);
                             }
                             if (event.button.y < TOPBAR_HEIGHT)
                                 handle_topbar_click(&context, event.button.x, event.button.y);
